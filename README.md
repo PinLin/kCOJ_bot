@@ -4,7 +4,7 @@ Telegram Bot that is for students in The Great NTUT CSIE.
 
 Via this bot, you could manage your homeworks of Computer Programming Class.
 
-It runs as [@kCOJ_bot](https://telegram.me/kcoj_bot) now.
+It runs as [@kcoj_bot](https://telegram.me/kcoj_bot) now.
 
 ## Requirements
 
