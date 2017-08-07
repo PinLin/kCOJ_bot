@@ -47,7 +47,7 @@ class kuser:
                                  "你今天寫扣了嗎？", parse_mode='HTML',
                                  reply_markup=ReplyKeyboardMarkup(keyboard=[
                                      [KeyboardButton(text="查看題庫📝"), KeyboardButton(text="重新整理🔃")],
-                                     [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="提供幫助📚")]
+                                     [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
                                  ]))
     def display_questions(self, chat_id):
         q_list = self.api.list_questions()
@@ -64,21 +64,36 @@ class kuser:
                                  "你今天寫扣了嗎？", parse_mode='HTML',
                                  reply_markup=ReplyKeyboardMarkup(keyboard=[
                                      [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="重新載入🔃")],
-                                     [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="提供幫助📚")]
+                                     [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
                                  ]))
     def display_question(self, chat_id, number):
         content = self.api.show_question(number)
         q = self.api.list_questions()[number]
         q_str = "📗" if q[1] == '期限未到' else "📕"
         q_str += "<b>" + number + "</b> (到 " + q[0] + ")"
-        bot.sendMessage(chat_id, q_str + "\n<code>" + content + "</code>\n" + q_str,
+        bot.sendMessage(chat_id, q_str + "\n<code>" + content + "</code>",
                          parse_mode='HTML',
                          reply_markup=ReplyKeyboardMarkup(keyboard=[
                                      [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題庫📝")],
                                      [KeyboardButton(text="上傳解答📮"), KeyboardButton(text="查看結果☑️"), KeyboardButton(text="通過名單🌐")] if q[1] == '期限未到' else 
                                      [KeyboardButton(text="查看結果☑️"), KeyboardButton(text="通過名單🌐")],
-                                     [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="提供幫助📚")]
+                                     [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
                          ]))
+    def help_you(self, chat_id):
+        bot.sendMessage(chat_id, "這裡是 kC Online Judge Bot！\n"
+                                 "可以簡稱我為 kCOJ Bot，目前定居於 `@kcoj_bot`\n"
+                                 "作用是讓大家可以方便的透過我使用郭老程設課的 OJ\n"
+                                 "操作很簡單（？）我想大家應該都不會有問題吧～\n\n"
+                                 "不過還是有些需要注意的地方：\n"
+                                 "1. 學號與密碼將以「明文」方式儲存。\n"
+                                 "2. 反正郭老的 OJ 也是「明文」存您的帳號密碼。\n"
+                                 "3. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利", parse_mode="Markdown",
+                                 reply_markup=ReplyKeyboardMarkup(keyboard=[
+                                     [KeyboardButton(text="回主畫面🏠")]
+                                 ]))
+        time.sleep(0.6)
+        bot.sendMessage(chat_id, "\n原始碼被託管於 GitHub，網址如下：\n"
+                                 "https://github.com/PinLin/kcoj_bot")
 
 def split_cmd(text):
     if text[0] != '/':
@@ -111,6 +126,11 @@ def on_chat(msg):
             bot.sendMessage(chat_id, "登入中...")
             if me.test_login(chat_id) == True:
                 me.display_main(chat_id)
+        elif me.status == 4:
+            me.password = msg['text']
+            bot.sendMessage(chat_id, "修改成功" if me.api.change_password(me.password) == True else "修改失敗")
+            if me.test_login(chat_id) == True:
+                me.display_main(chat_id)
         elif command[0] == '/start' or command[0] == '重新整理🔃' or command[0] == '回主畫面🏠':
             if me.status == 0:
                 me.status = 1
@@ -120,14 +140,19 @@ def on_chat(msg):
             else:
                 if me.test_login(chat_id) == True:
                     me.display_main(chat_id)
-        elif command[0] == '/question' or command[0] == '查看題庫📝' or command[0] == '重新載入🔃' or command[0] == '回到題庫📝':
+        elif command[0] == '/question' or command[0] == '查看題庫📝' or command[0] == '回到題庫📝' or command[0] == '重新載入🔃':
             if me.test_login(chat_id) == True:
                 if len(command) > 1:
                     me.display_question(chat_id, command[1])
                 else:
                     me.display_questions(chat_id)
         elif command[0] == '/help' or command[0] == '提供幫助📚':
-            pass
+            if me.test_login(chat_id) == True:
+                me.help_you(chat_id)
+        elif command[0] == '/password' or command[0] == '修改密碼💱':
+            if me.test_login(chat_id) == True:
+                me.status = 4
+                bot.sendMessage(chat_id, "請輸入要設定的新密碼：", reply_markup=ReplyKeyboardRemove())
         elif command[0] == '/logout' or command[0] == '登出帳號🚪':
             bot.sendMessage(chat_id, "您現在已經是登出的狀態。", reply_markup=ReplyKeyboardRemove())
             me = kuser()

@@ -3,6 +3,7 @@
 # necessary modules
 import requests
 from bs4 import BeautifulSoup
+from pprint import pprint
 # configurations
 import config
 
@@ -72,9 +73,16 @@ class kuser_api:
         return soup.find('body').get_text().replace('\n', '') == 'delete success'
     # hand in a answer
     def upload_answer(self, number):
-        response = self.session.get(config.URL + '/upLoadHw', params={'hwId': number})
+        self.session.get(config.URL + '/upLoadHw', params={'hwId': number})
         response = self.session.post(config.URL + '/upLoadFile')
         return response.text # unavailable
+
+    def change_password(self, password):
+        payload = {'pass': password, 
+                   'submit': 'sumit'}
+        response = self.session.post(config.URL + '/changePasswd', data=payload)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        return str(soup.find('body')).split()[-2] == 'Success'
 
 # for debug
 def main():
