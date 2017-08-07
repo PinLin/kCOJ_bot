@@ -6,15 +6,13 @@ from bs4 import BeautifulSoup
 # configurations
 import config
 
-class kuser:
-    def __init__(self, un='', pw=''):
-        self.username = un
-        self.password = pw
+class kuser_api:
+    def __init__(self):
         self.session = requests.Session()
     # login kCOJ
-    def login(self):
-        payload = {'name': self.username, 
-                   'passwd': self.password,
+    def login(self, username, password):
+        payload = {'name': username, 
+                   'passwd': password,
                    'rdoCourse': 1}
         return self.session.post(config.URL + '/Login', data=payload)
     # check online status
@@ -33,8 +31,9 @@ class kuser:
             else:
                 number = tag.find('a').get_text()
                 deadline = tag.find_all('td')[3].get_text()
-                status = tag.find_all('td')[5].get_text()
-                questions[number] = (deadline, status)
+                submit = "期限已到" if tag.find_all('td')[4].get_text().strip() == "期限已過" else "期限未到"
+                status = tag.find_all('td')[5].get_text().strip()
+                questions[number] = (deadline, submit, status)
         return questions
     # show the content of the question
     def show_question(self, number):
@@ -44,6 +43,7 @@ class kuser:
         content = content.replace('<body alink="#FFCCFF" bgcolor="#000000" link="#00FFFF" text="#FFFFFF" vlink="#CCFF33">\n', '')
         content = content.replace('<!DOCTYPE html>\n\n', '').replace('<meta charset="utf-8"/>\n', '')
         content = content.replace('<input onclick="history.go( -1 );return true;" type="button" value="上一頁"/>', '')
+        content = content.replace('<a href="upLoadHw?hwId=' + number + '">  繳交作業 </a>', '')
         content = content.replace('</body>', '').replace('<br/>       ', '\n').replace('<br/>', '\n').replace('     ', '')
         return content
     # list passers of the question
@@ -78,11 +78,7 @@ class kuser:
 
 # for debug
 def main():
-    users = {}
-    users[config.DEBUG_ID] = kuser(config.DEBUG_USER, config.DEBUG_PSWD)
-    me = users[config.DEBUG_ID]
-    me.login()
-    print(me.upload_answer('012'))
+    pass
 
 if __name__ == '__main__':
     main()
