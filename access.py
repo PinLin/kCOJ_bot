@@ -11,7 +11,7 @@ class kuser_api:
     def __init__(self):
         self.session = requests.Session()
     # login kCOJ
-    def login(self, username, password):
+    def login_kcoj(self, username, password):
         payload = {'name': username, 
                    'passwd': password,
                    'rdoCourse': 1}
