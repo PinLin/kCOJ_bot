@@ -116,7 +116,7 @@ class kuser:
                                            ]))
 
     def display_question(self, number):
-        self = '正常使用'
+        self.status = '正常使用'
         content = self.api.show_question(number)
         q = self.api.list_questions()[number]
         q_str = "📗" if q[1] == '期限未到' else "📕"
