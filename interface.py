@@ -217,7 +217,7 @@ class kuser:
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題目📜")]
                 ]))
-            
+        os.remove('answers/' + self.username + self.question + '.c')    
     
     def fail_send(self):
         self.status = '正常使用'
