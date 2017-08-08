@@ -121,7 +121,7 @@ class kuser:
         q = self.api.list_questions()[number]
         q_str = "📗" if q[1] == '期限未到' else "📕"
         q_str += "<b>" + number + "</b> (到 " + q[0] + ")"
-        self.bot.sendMessage(self.chat_id, q_str + "\n<code>" + content + "</code>",
+        self.bot.sendMessage(self.chat_id, q_str + "\n\n<code>" + content + "</code>",
             parse_mode='HTML',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題庫📝")],
