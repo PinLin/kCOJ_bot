@@ -13,22 +13,6 @@ It runs as [@kcoj_bot](https://telegram.me/kcoj_bot) now.
   - requests
   - beautifulsoup
 
-## Install
+## License
 
-Clone it.
-
-```bash
-git clone https://github.com/pinlin/kCOJ_bot.git
-```
-
-Install necessary modules.
-
-```bash
-pip install requests bs4 telepotInstall
-```
-
-Run it.
-
-```bash
-python bot.py
-```
+GPLv3
