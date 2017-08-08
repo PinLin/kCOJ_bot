@@ -87,6 +87,8 @@ def on_chat(msg):
                     pass # unavailable
                 elif command[0] == '回到題目📜':
                     user.display_question(user.question)
+        else:
+            bot.sendMessage(chat_id, "快去寫扣啦！")
 
     elif content_type == 'document':
         if user.status == '上傳答案':

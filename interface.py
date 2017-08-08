@@ -108,7 +108,7 @@ class kuser:
             q_str = q_available
             for key in q_dict.keys():
                 if q_dict[key][1] == '期限未到':
-                    q_str += "📗<b>" + key + "</b> (到 " + q_dict[key][0] + ")\n [" + q_dict[key][2] + "] /question_" + key + "\n\n"
+                    q_str += "📗<b>" + key + "</b> (到 " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]] /question_" + key + "\n\n"
             if q_str == q_available:
                 q_str = q_unavailable
         self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> /logout\n"
@@ -127,7 +127,7 @@ class kuser:
         q_str = ''
         for key in q_dict.keys():
             q_str += "📗" if q_dict[key][1] == '期限未到' else "📕"
-            q_str += "<b>" + key + "</b> (到 " + q_dict[key][0] + ")\n [" + q_dict[key][2] + "] /question_" + key + "\n\n"
+            q_str += "<b>" + key + "</b> (到 " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]] /question_" + key + "\n\n"
         self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> /logout\n"
                                            "➖➖➖➖➖\n📝<i>所有作業</i>\n\n" + q_str + "➖➖➖➖➖\n"
                                            "你今天寫扣了嗎？", 
@@ -143,7 +143,7 @@ class kuser:
         content = self.api.show_question(number)
         q = self.api.list_questions()[number]
         q_str = "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + number + "</b> (到 " + q[0] + ")\n [" + q[2] + "]\n"
+        q_str += "<b>" + number + "</b> (到 " + q[0] + ")\n [[" + q[2] + "]]\n"
         self.bot.sendMessage(self.chat_id, q_str + "\n\n<code>" + content + "</code>",
             parse_mode='HTML',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
@@ -160,11 +160,13 @@ class kuser:
                                            "可以簡稱我為 kCOJ Bot，目前定居於 `@kcoj_bot`\n"
                                            "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
                                            "操作很簡單（？）我想大家應該都不會有問題吧～\n\n"
-                                           "不過還是有些需要注意的地方：\n"
-                                           "1. 學號與密碼將以「明文」方式儲存在記憶體裡，不會儲存在我的硬碟中。\n"
-                                           "2. 反正郭老的 Online Judge 也是「明文」存您的帳號密碼。\n"
-                                           "3. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利。\n\n"
-                                           "然後，附個[郭老 Online Judge 傳送門](" + config.URL + ")", parse_mode="Markdown",
+                                           "不過還是稍微提幾個需要注意的地方：\n"
+                                           "1. 📗代表還可以繳交的作業，📕代表已經不能繳交的作業\n"
+                                           "2. 刪除作業⚔️ 的功能被放在 上傳作業📮 裡面\n"
+                                           "3. 學號與密碼將以「明文」方式儲存在記憶體裡，不會儲存在我的硬碟中\n"
+                                           "4. 郭老的 Online Judge 其實也是以「明文」的方式存您的帳號密碼哦\n"
+                                           "5. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利。\n\n"
+                                           "然後，附上 [郭老 Online Judge 傳送門](" + config.URL + ")", parse_mode="Markdown",
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                [KeyboardButton(text="回主畫面🏠")],
                                                [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
