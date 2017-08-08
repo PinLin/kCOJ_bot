@@ -65,8 +65,10 @@ class kuser:
         self.press_username()
 
     def check_online(self):
-        self.api.login_kcoj(self.username, self.password)
-        if self.api.check_online() == True:
+        if self.api.login_kcoj(self.username, self.password) == None:
+            self.bot.sendMessage(self.chat_id, "郭老網站離線中！")
+            return False
+        elif self.api.check_online() == True:
             return True
         else:
             self.fail_login()
@@ -116,16 +118,16 @@ class kuser:
                                            ]))
 
     def display_question(self, number):
-        self.status = '正常使用'
+        self.status = number
         content = self.api.show_question(number)
         q = self.api.list_questions()[number]
         q_str = "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + number + "</b> (到 " + q[0] + ")"
+        q_str += "<b>" + number + "</b> (到 " + q[0] + ")\n [" + q[2] + "]\n"
         self.bot.sendMessage(self.chat_id, q_str + "\n\n<code>" + content + "</code>",
             parse_mode='HTML',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題庫📝")],
-                [KeyboardButton(text="上傳解答📮"), KeyboardButton(text="查看結果☑️"), KeyboardButton(text="通過名單🌐")] if q[1] == '期限未到' else 
+                [KeyboardButton(text="上傳答案📮"), KeyboardButton(text="查看結果☑️"), KeyboardButton(text="通過名單🌐")] if q[1] == '期限未到' else 
                 [KeyboardButton(text="查看結果☑️"), KeyboardButton(text="通過名單🌐")],
                 [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
             ]))
