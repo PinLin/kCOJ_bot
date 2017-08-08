@@ -82,16 +82,16 @@ def on_chat(msg):
                 if command[0] == '/upload' or command[0] == '上傳答案📮':
                     user.upload_answer()
                 elif command[0] == '/result' or command[0] == '查看結果☑️':
-                    pass # unavailable
+                    user.list_results()
                 elif command[0] == '/passer' or command[0] == '通過名單🌐':
-                    pass # unavailable
+                    user.list_passers()
                 elif command[0] == '回到題目📜':
                     user.display_question(user.question)
         else:
             bot.sendMessage(chat_id, "快去寫扣啦！")
 
     elif content_type == 'document':
-        if user.status == '上傳答案':
+        if user.status == '上傳答案' or user.status == '查看題目':
             if user.check_online() == True:
                 if msg['document']['file_size'] > 167770000:
                     pass
