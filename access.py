@@ -67,7 +67,7 @@ class kuser_api:
     def list_passers(self, number):
         try:
             passers = []
-            response = self.session.get(config.URL + '/success.jsp', params={'HW_ID': number}, timeout=0.1)
+            response = self.session.get(config.URL + '/success.jsp', params={'HW_ID': number}, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             for tr in soup.find_all('tr'):
                 passer = tr.get_text().replace('\n', '')
