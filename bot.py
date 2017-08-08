@@ -49,6 +49,10 @@ def on_chat(msg):
             if user.check_online() == True:
                 user.change_password(msg['text'])
 
+        elif user.status == '上傳答案':
+            if user.check_online() == True:
+                user.send_answer(msg['text'], '')
+
         elif command[0] == '/start' or command[0] == '重新整理🔃' or command[0] == '回主畫面🏠':
             if user.check_online() == True:
                 user.display_main()
@@ -73,10 +77,26 @@ def on_chat(msg):
             users[str(chat_id)] = user
             user.logout_system()
 
-    elif False:
-        # receive a document
-        pass
+        elif user.question != '題外':
+            if user.check_online() == True:
+                if command[0] == '/upload' or command[0] == '上傳答案📮':
+                    user.upload_answer()
+                elif command[0] == '/result' or command[0] == '查看結果☑️':
+                    pass # unavailable
+                elif command[0] == '/passer' or command[0] == '通過名單🌐':
+                    pass # unavailable
+                elif command[0] == '回到題目📜':
+                    user.display_question(user.question)
 
+    elif content_type == 'document':
+        if user.status == '上傳答案':
+            if user.check_online() == True:
+                if msg['document']['file_size'] > 167770000:
+                    pass
+                else:
+                    user.send_answer('', msg['document']['file_id'])
+        else:
+            bot.sendMessage(chat_id, "是擅長寫扣的朋友呢！")
     else:
         bot.sendMessage(chat_id, "我不是來看這些的。")
 

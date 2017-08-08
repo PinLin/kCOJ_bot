@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # necessary modules
-import requests, telepot
+import os, requests, telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from pprint import pprint
@@ -17,6 +17,7 @@ class kuser:
         self.username = ''
         self.password = ''
         self.status = '第一次用'
+        self.question = '題外'
         self.api = access.kuser_api()
 
     def new_user(self):
@@ -25,20 +26,26 @@ class kuser:
     
     def press_username(self):
         self.status = '輸入學號'
+        self.question = '題外'
         self.bot.sendMessage(self.chat_id, "請輸入您的學號：", reply_markup=ReplyKeyboardRemove())
 
     def press_password(self, text):
         self.status = '輸入密碼'
+        self.question = '題外'
         self.username = text
         self.bot.sendMessage(self.chat_id, "輸入完可刪除訊息以策安全！\n請輸入您的密碼：", reply_markup=ReplyKeyboardRemove())
 
     def press_oldpassword(self):
         self.status = '舊的密碼'
-        self.bot.sendMessage(self.chat_id, "輸入錯誤將取消操作\n"
-                                           "請輸入要原本的舊密碼：", reply_markup=ReplyKeyboardRemove())
+        self.question = '題外'
+        self.bot.sendMessage(self.chat_id, "請輸入要原本的舊密碼：", parse_mode="Markdown",
+                                           reply_markup=ReplyKeyboardMarkup(keyboard=[
+                                               [KeyboardButton(text="回主畫面🏠")]
+                                           ]))
 
     def press_newpassword(self, text):
         self.status = '修改密碼'
+        self.question = '題外'
         if text != self.password:
             self.display_main()
         else:
@@ -47,26 +54,35 @@ class kuser:
         
     def change_password(self, text):
         self.status = '正常使用'
-        self.password = text
-        self.bot.sendMessage(self.chat_id, "修改成功" if self.api.change_password(self.password) == True else "修改失敗",
-            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                [KeyboardButton(text="回主畫面🏠")]
-            ]))
+        self.question = '題外'
+        if text == "回主畫面🏠":
+            self.display_main()
+        else:
+            self.password = text
+            self.bot.sendMessage(self.chat_id, "修改成功" if self.api.change_password(self.password) == True else "修改失敗",
+                reply_markup=ReplyKeyboardMarkup(keyboard=[
+                    [KeyboardButton(text="回主畫面🏠")]
+                ]))
 
     def login_kcoj(self, text):
         self.status = '正常使用'
+        self.question = '題外'
         self.password = text
         self.bot.sendMessage(self.chat_id, "登入中...", reply_markup=ReplyKeyboardRemove())
         if self.check_online() == True:
             self.display_main()
 
     def fail_login(self):
+        self.status = '正常使用'
+        self.question = '題外'
         self.bot.sendMessage(self.chat_id, "哇...登入失敗，讓我們重新開始一次", reply_markup=ReplyKeyboardRemove())
         self.press_username()
 
     def check_online(self):
+        self.status = '正常使用'
         if self.api.login_kcoj(self.username, self.password) == None:
-            self.bot.sendMessage(self.chat_id, "郭老網站離線中！")
+            self.question = '題外'
+            self.bot.sendMessage(self.chat_id, "郭老網站離線中！", reply_markup=ReplyKeyboardRemove())
             return False
         elif self.api.check_online() == True:
             return True
@@ -75,11 +91,14 @@ class kuser:
             return False
 
     def logout_system(self):
+        self.status = '正常使用'
+        self.question = '題外'
         self.bot.sendMessage(self.chat_id, "您現在已經是登出的狀態。", reply_markup=ReplyKeyboardRemove())
         self.press_username()
 
     def display_main(self):
         self.status = '正常使用'
+        self.question = '題外'
         q_dict = self.api.list_questions()
         q_available = "📝<i>可繳交的作業</i>\n\n"
         q_unavailable = "📝<i>沒有可繳交的作業哦！</i>\n"
@@ -103,6 +122,7 @@ class kuser:
 
     def display_questions(self):
         self.status = '正常使用'
+        self.question = '題外'
         q_dict = self.api.list_questions()
         q_str = ''
         for key in q_dict.keys():
@@ -118,7 +138,8 @@ class kuser:
                                            ]))
 
     def display_question(self, number):
-        self.status = number
+        self.status = '正常使用'
+        self.question = number
         content = self.api.show_question(number)
         q = self.api.list_questions()[number]
         q_str = "📗" if q[1] == '期限未到' else "📕"
@@ -134,6 +155,7 @@ class kuser:
 
     def help_you(self):
         self.status = '正常使用'
+        self.question = '題外'
         self.bot.sendMessage(self.chat_id, "這裡是 kC Online Judge Bot！\n"
                                            "可以簡稱我為 kCOJ Bot，目前定居於 `@kcoj_bot`\n"
                                            "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
@@ -144,7 +166,62 @@ class kuser:
                                            "3. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利。\n\n"
                                            "然後，附個[郭老 Online Judge 傳送門](" + config.URL + ")", parse_mode="Markdown",
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                               [KeyboardButton(text="回主畫面🏠")]
+                                               [KeyboardButton(text="回主畫面🏠")],
+                                               [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
                                            ]))
         self.bot.sendMessage(self.chat_id, "\n原始碼被託管於 GitHub，網址如下：\n"
                                            "https://github.com/PinLin/kcoj_bot")
+    def upload_answer(self):
+        self.status = '上傳答案'
+        self.bot.sendMessage(self.chat_id, "現在請把你的程式碼讓我看看（請別超過 20 MB）\n"
+                                           "可以使用「文字訊息」或是「傳送檔案」的方式", parse_mode="Markdown",
+                                           reply_markup=ReplyKeyboardMarkup(keyboard=[
+                                               [KeyboardButton(text="移除檔案⚔️")],
+                                               [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題目📜")]] if self.api.list_questions()[self.question][2] == '已繳' else [
+                                               [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題目📜")]
+                                           ]))
+
+    def send_answer(self, text, file_id):
+        self.status = '正常使用'
+        if text != '':
+            if text == '回主畫面🏠':
+                if self.check_online() == True:
+                    self.display_main()
+                    return
+            elif text == '回到題目📜':
+                if self.check_online() == True:
+                    self.display_question(self.question)
+                    return
+            elif text == '移除檔案⚔️':
+                self.bot.sendMessage(self.chat_id, "移除成功" if self.api.delete_answer(self.question) == True else "移除失敗",
+                    reply_markup=ReplyKeyboardMarkup(keyboard=[
+                        [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題目📜")]
+                    ]))
+                return
+            else:
+                if os.path.exists('answers') == False:
+                    os.mkdir('answers')
+                f = open('answers/' + self.username + self.question + '.c', 'w')
+                f.write(text)
+                f.close()
+        else:
+            self.bot.download_file(file_id, 'answers/' + self.username + self.question + '.c')
+        self.api.delete_answer(self.question)
+        if self.api.upload_answer(self.question, 'answers/' + self.username + self.question + '.c') == True:
+            self.bot.sendMessage(self.chat_id, "上傳成功",
+                reply_markup=ReplyKeyboardMarkup(keyboard=[
+                    [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="查看結果☑️"), KeyboardButton(text="回到題目📜")]
+                ]))
+        else:
+            self.bot.sendMessage(self.chat_id, "上傳失敗",
+                reply_markup=ReplyKeyboardMarkup(keyboard=[
+                    [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題目📜")]
+                ]))
+            
+    
+    def fail_send(self):
+        self.status = '正常使用'
+        self.bot.sendMessage(self.chat_id, "檔案不能超過 20 MB！上傳失敗",
+                                           reply_markup=ReplyKeyboardMarkup(keyboard=[
+                                               [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題目📜")]
+                                           ]))
