@@ -33,7 +33,7 @@ class kuser_api:
     def list_questions(self):
         try:
             questions = {}
-            response = self.session.get(config.URL + '/HomeworkBoard', timeout=0.1)
+            response = self.session.get(config.URL + '/HomeworkBoard', timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             for tag in soup.find_all('tr'):
                 if tag.find('a') == None:
