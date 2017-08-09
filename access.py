@@ -51,14 +51,12 @@ class kuser_api:
     # show the content of the question
     def show_question(self, number):
         try:
-            response = self.session.get(config.URL + '/showHomework', params={'hwId': number}, timeout=0.1)
+            response = self.session.get(config.URL + '/showHomework', params={'hwId': number}, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
-            content = str(soup.find('body'))
-            content = content.replace('<body alink="#FFCCFF" bgcolor="#000000" link="#00FFFF" text="#FFFFFF" vlink="#CCFF33">\n', '')
-            content = content.replace('<!DOCTYPE html>\n\n', '').replace('<meta charset="utf-8"/>\n', '')
-            content = content.replace('<input onclick="history.go( -1 );return true;" type="button" value="上一頁"/>', '')
-            content = content.replace('<a href="upLoadHw?hwId=' + number + '">  繳交作業 </a>', '')
-            content = content.replace('</body>', '').replace('<br/>       ', '\n').replace('<br/>', '\n').replace('     ', '')
+            raw = soup.find('body').get_text().replace('繳交作業', '').strip()
+            content = ''
+            for s in raw.split('\r'):
+                content += s.strip() + '\n'
             return content
         except requests.exceptions.Timeout:
             return 'Timeout'
