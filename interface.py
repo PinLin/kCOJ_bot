@@ -168,16 +168,16 @@ class kuser:
         self.bot.sendMessage(self.chat_id, "這裡是 kC Online Judge Bot！\n"
                                            "可以簡稱我為 kCOJ Bot，目前定居於 `@kcoj_bot`\n"
                                            "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
-                                           "操作很簡單（？）我想大家應該都不會有問題吧～\n\n"
-                                           "<b>不過還是稍微提幾個需要注意的地方：</b>\n"
+                                           "操作很簡單（？）\n\n"
+                                           "還是稍微提幾個需要注意的地方：\n"
                                            "1. 太久沒有用點下去反應會有點慢，可能要等一下\n"
-                                           "1. 📗代表還可以繳交的作業，📕代表已經不能繳交的作業\n"
+                                           "2. 📗代表還可以繳交的作業，📕代表已經不能繳交的作業\n"
                                            "3. 其實在查看題目的畫面就可以用「拖曳」的方式 上傳作業📮\n"
-                                           "2. 刪除作業⚔️ 的功能被放在 上傳作業📮 裡面\n"
-                                           "3. 學號與密碼將以「明文」方式儲存在記憶體裡，不會儲存在我的硬碟中\n"
-                                           "4. 郭老的 Online Judge 其實也是以「明文」的方式存您的帳號密碼哦\n"
-                                           "5. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利。\n\n"
-                                           "然後，附上 [郭老 Online Judge 傳送門](" + config.URL + ")", parse_mode='Markdown',
+                                           "4. 刪除作業⚔️ 的功能被放在 上傳作業📮 裡面\n"
+                                           "5. 學號與密碼將以「明文」方式儲存在記憶體，不會儲存在硬碟中\n"
+                                           "6. 郭老的 Online Judge 其實也是以「明文」的方式存您的帳號密碼哦\n"
+                                           "7. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利\n\n"
+                                           "然後，附上厲害的 [郭老 Online Judge 傳送門](" + config.URL + ")", parse_mode='Markdown',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                [KeyboardButton(text="回主畫面🏠")],
                                                [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
