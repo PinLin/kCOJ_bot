@@ -113,4 +113,5 @@ def main():
 if __name__ == '__main__':
     main()
     while True:
-        time.sleep(10)
+        time.sleep(100)
+        bot.getMe()
