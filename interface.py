@@ -158,7 +158,7 @@ class kuser:
         k += [[KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]]
         self.bot.sendMessage(self.chat_id, q_str + "\n```\n" + content + "\n```",
             parse_mode='Markdown',
-            reply_markup=ReplyKeyboardMarkup(keyboard=k)
+            reply_markup=ReplyKeyboardMarkup(keyboard=k))
 
     def help_you(self):
         self.status = '正常使用'
