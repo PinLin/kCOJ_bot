@@ -25,7 +25,7 @@ class kuser_api:
         try:
             response = self.session.get(config.URL + '/TopMenu', timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
-            return soup.find('a').get_text() == '線上考試'
+            return soup.find('a').get_text().strip() == '線上考試'
         except requests.exceptions.Timeout:
             return True
 
@@ -39,8 +39,8 @@ class kuser_api:
                 if tag.find('a') == None:
                     continue
                 else:
-                    number = tag.find('a').get_text()
-                    deadline = tag.find_all('td')[3].get_text()
+                    number = tag.find('a').get_text().strip()
+                    deadline = tag.find_all('td')[3].get_text().strip()
                     submit = "期限已到" if tag.find_all('td')[4].get_text().strip() == "期限已過" else "期限未到"
                     status = tag.find_all('td')[5].get_text().strip()
                     questions[number] = (deadline, submit, status)
@@ -68,7 +68,7 @@ class kuser_api:
             response = self.session.get(config.URL + '/success.jsp', params={'HW_ID': number}, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             for tr in soup.find_all('tr'):
-                passer = tr.get_text().replace('\n', '')
+                passer = tr.get_text().replace('\n', '').strip()
                 if passer != '學號':
                     passers += [passer]
             return passers
@@ -83,8 +83,8 @@ class kuser_api:
             soup = BeautifulSoup(response.text, 'html.parser')
             for tr in soup.find_all('tr'):
                 td = tr.find('td')
-                if td.get_text() != '測試編號':
-                    results += [(td.get_text(), tr.find_all('td')[1].get_text())]
+                if td.get_text().strip() != '測試編號':
+                    results += [(td.get_text().strip(), tr.find_all('td')[1].get_text().strip())]
             return results
         except requests.exceptions.Timeout:
             return ['Timeout', 'Timeout']
@@ -96,7 +96,7 @@ class kuser_api:
                        'submit': 'sumit'}
             response = self.session.post(config.URL + '/changePasswd', data=payload, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
-            return str(soup.find('body')).split()[-2] == 'Success'
+            return str(soup.find('body')).split()[-2].strip() == 'Success'
         except requests.exceptions.Timeout:
             return False
 
@@ -105,7 +105,7 @@ class kuser_api:
         try:
             response = self.session.get(config.URL + '/delHw', params={'title': number}, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
-            return soup.find('body').get_text().replace('\n', '') == 'delete success'
+            return soup.find('body').get_text().replace('\n', '').strip() == 'delete success'
         except requests.exceptions.Timeout:
             return False
 
