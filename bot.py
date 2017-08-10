@@ -3,7 +3,6 @@
 # necessary modules
 import time, requests, telepot
 from telepot.loop import MessageLoop
-from telepot.namedtuple import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from pprint import pprint
 # kCOJ API
 import access

@@ -2,9 +2,7 @@
 
 # necessary modules
 import os, requests, telepot
-from telepot.loop import MessageLoop
 from telepot.namedtuple import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
-from pprint import pprint
 # kCOJ API
 import access
 # configurations
@@ -181,7 +179,8 @@ class kuser:
                                                [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
                                            ]))
         self.bot.sendMessage(self.chat_id, "專案授權方式採用 GPLv3\n"
-                                           "原始碼被託管於 GitHub，網址如下：\n"
+                                           "非常歡迎發 issue 送 PR owooo\n"
+                                           "原始碼被託管於 GitHub，大大們有空的話可以按個星星支持一下> <網址如下：\n"
                                            "https://github.com/PinLin/kcoj_bot")
     def upload_answer(self):
         self.status = '上傳答案'
