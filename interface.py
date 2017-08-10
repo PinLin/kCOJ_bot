@@ -146,8 +146,7 @@ class kuser:
         content = self.api.show_question(number)
         q = self.api.list_questions()[number]
         q_str = "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + number + "</b> (到 " + q[0] + ")\n [[" + q[2] + "]]\n"
-
+        q_str += "**" + number + "** (到 " + q[0] + ")\n [[" + q[2] + "]]\n"
         k = [[KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題庫📝")]]
         k2 = []
         if q[1] == '期限未到':
@@ -157,10 +156,9 @@ class kuser:
         k2 += [KeyboardButton(text="通過名單🌐")]
         k += [k2]
         k += [[KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]]
-
-        self.bot.sendMessage(self.chat_id, q_str + "\n\n<code>" + content + "</code>",
-            parse_mode='HTML',
-            reply_markup=ReplyKeyboardMarkup(keyboard=k))
+        self.bot.sendMessage(self.chat_id, q_str + "\n```\n" + content + "\n```",
+            parse_mode='Markdown',
+            reply_markup=ReplyKeyboardMarkup(keyboard=k)
 
     def help_you(self):
         self.status = '正常使用'
@@ -182,7 +180,8 @@ class kuser:
                                                [KeyboardButton(text="回主畫面🏠")],
                                                [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
                                            ]))
-        self.bot.sendMessage(self.chat_id, "\n原始碼被託管於 GitHub，網址如下：\n"
+        self.bot.sendMessage(self.chat_id, "專案授權方式採用 GPLv3\n"
+                                           "原始碼被託管於 GitHub，網址如下：\n"
                                            "https://github.com/PinLin/kcoj_bot")
     def upload_answer(self):
         self.status = '上傳答案'
