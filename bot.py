@@ -52,39 +52,39 @@ def on_chat(msg):
             if user.check_online() == True:
                 user.send_answer(msg['text'], '')
 
-        elif command[0] == '/start' or command[0] == '重新整理🔃' or command[0] == '回主畫面🏠':
+        elif command[0] == '/start' or command[0] == '主畫面🏠':
             if user.check_online() == True:
                 user.display_main()
 
-        elif command[0] == '/question' or command[0] == '查看題庫📝' or command[0] == '回到題庫📝' or command[0] == '重新載入🔃':
+        elif command[0] == '/question' or command[0] == '題庫📝' or command[0] == '更新🔃':
             if user.check_online() == True:
                 if len(command) > 1:
                     user.display_question(command[1])
                 else:
                     user.display_questions()
 
-        elif command[0] == '/help' or command[0] == '提供幫助📚':
+        elif command[0] == '/help' or command[0] == '幫助📚':
             if user.check_online() == True:
                 user.help_you()
 
-        elif command[0] == '/password' or command[0] == '修改密碼💱':
+        elif command[0] == '/password' or command[0] == '改密碼💱':
             if user.check_online() == True:
                 user.press_oldpassword()
 
-        elif command[0] == '/logout' or command[0] == '登出帳號🚪':
+        elif command[0] == '/logout' or command[0] == '登出🚪':
             user = kuser(chat_id, bot)
             users[str(chat_id)] = user
             user.logout_system()
 
         elif user.question != '題外':
             if user.check_online() == True:
-                if command[0] == '/upload' or command[0] == '上傳答案📮':
+                if command[0] == '/upload' or command[0] == '交作業📮':
                     user.upload_answer()
-                elif command[0] == '/result' or command[0] == '查看結果☑️':
+                elif command[0] == '/result' or command[0] == '看結果☑️':
                     user.list_results()
-                elif command[0] == '/passer' or command[0] == '通過名單🌐':
+                elif command[0] == '/passer' or command[0] == '通過者🌐':
                     user.list_passers()
-                elif command[0] == '回到題目📜':
+                elif command[0] == '回題目📜':
                     user.display_question(user.question)
         else:
             bot.sendMessage(chat_id, "快去寫扣啦！")
