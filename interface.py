@@ -264,7 +264,7 @@ class kuser:
             q_str += "\n測試編號 <code>" + result[0] + "</code>："
             q_str += "✔️ " if result[1] == '通過測試' else "❌ "
             q_str += result[1]
-            self.bot.sendMessage(self.chat_id, q_str, 
+        self.bot.sendMessage(self.chat_id, q_str, 
             parse_mode='HTML', 
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["主畫面🏠", "回題目📜"],
