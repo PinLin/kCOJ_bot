@@ -56,7 +56,7 @@ def on_chat(msg):
             if user.check_online() == True:
                 user.display_main()
 
-        elif command[0] == '/question' or command[0] == '題庫📝' or command[0] == '更新🔃':
+        elif command[0] == '/question' or command[0] == '題庫📝' or command[0] == '回題庫📝' or command[0] == '更新🔃':
             if user.check_online() == True:
                 if len(command) > 1:
                     user.display_question(command[1])
