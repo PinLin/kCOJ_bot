@@ -214,15 +214,13 @@ class kuser:
                     ]))
                 return
             else:
-                if os.path.exists('answers') == False:
-                    os.mkdir('answers')
-                f = open('answers/' + self.username + self.question + '.c', 'w')
+                f = open(self.username + self.question + '.c', 'w')
                 f.write(text)
                 f.close()
         else:
-            self.bot.download_file(file_id, 'answers/' + self.username + self.question + '.c')
+            self.bot.download_file(file_id, self.username + self.question + '.c')
         self.api.delete_answer(self.question)
-        if self.api.upload_answer(self.question, 'answers/' + self.username + self.question + '.c') == True:
+        if self.api.upload_answer(self.question, self.username + self.question + '.c') == True:
             self.bot.sendMessage(self.chat_id, "上傳成功",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題目📜")],
@@ -235,7 +233,7 @@ class kuser:
                     [KeyboardButton(text="回主畫面🏠"), KeyboardButton(text="回到題目📜")],
                     [KeyboardButton(text="登出帳號🚪"), KeyboardButton(text="修改密碼💱"), KeyboardButton(text="提供幫助📚")]
                 ]))
-        os.remove('answers/' + self.username + self.question + '.c')    
+        os.remove(self.username + self.question + '.c')    
     
     def fail_send(self):
         self.status = '正常使用'
