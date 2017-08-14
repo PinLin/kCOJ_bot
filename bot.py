@@ -93,7 +93,7 @@ def on_chat(msg):
         if user.status == '上傳答案' or user.status == '查看題目':
             if user.check_online() == True:
                 if msg['document']['file_size'] > 167770000:
-                    pass
+                    user.fail_send()
                 else:
                     user.send_answer('', msg['document']['file_id'])
         else:
