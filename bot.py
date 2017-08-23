@@ -88,6 +88,7 @@ def on_chat(msg):
         elif command[0] == '/restart':
             if str(from_id) in config.ADMIN:
                 bot.sendMessage(chat_id, "即將更新並重新啟動")
+                print("Restarting...")
                 time.sleep(1)
                 os._exit(0)
 
@@ -111,7 +112,7 @@ def on_chat(msg):
                     user.send_answer('', msg['document']['file_id'])
 
 MessageLoop(bot, on_chat).run_as_thread()
-print("Start...")
+print("Started! Service is available.")
 
 # for debug
 def main():
