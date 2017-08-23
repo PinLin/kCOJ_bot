@@ -27,7 +27,7 @@ class kuser_api:
             soup = BeautifulSoup(response.text, 'html.parser')
             return soup.find('a').get_text().strip() == '線上考試'
         except requests.exceptions.Timeout:
-            return True
+            return None
 
     # list all questions, deadline and hand-in status
     def list_questions(self):

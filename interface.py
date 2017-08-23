@@ -78,20 +78,25 @@ class kuser:
         self.bot.sendMessage(self.chat_id, "哇...登入失敗，讓我們重新開始一次", reply_markup=ReplyKeyboardRemove())
         self.press_username()
 
-    def check_online(self):
+    def check_online(self): # edit
         self.status = '正常使用'
-        if self.api.login_kcoj(self.username, self.password) == None:
+        result = self.api.check_online()
+        if result == None:
             self.question = '題外'
-            self.bot.sendMessage(self.chat_id, "郭老網站離線中！",
+            self.bot.sendMessage(self.chat_id, "郭老 Online Judge 離線中！",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["主畫面🏠"]
                 ], resize_keyboard=True))
             return False
-        elif self.api.check_online() == True:
+        elif result == True:
             return True
         else:
-            self.fail_login()
-            return False
+            self.api.login_kcoj(self.username, self.password)
+            if self.api.check_online() == False:
+                self.fail_login()
+                return False
+            else:
+                return True
 
     def logout_system(self):
         self.status = '正常使用'
