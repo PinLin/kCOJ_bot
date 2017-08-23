@@ -40,7 +40,7 @@ class kuser:
         self.question = '題外'
         self.bot.sendMessage(self.chat_id, "請輸入要原本的舊密碼：",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["主畫面🏠"]
+                ["首頁🏠"]
             ], resize_keyboard=True))
 
     def press_newpassword(self, text):
@@ -55,13 +55,13 @@ class kuser:
     def change_password(self, text):
         self.status = '正常使用'
         self.question = '題外'
-        if text == "主畫面🏠":
+        if text == "首頁🏠":
             self.display_main()
         else:
             self.password = text
             self.bot.sendMessage(self.chat_id, "修改成功" if self.api.change_password(self.password) == True else "修改失敗",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
-                    ["主畫面🏠"]
+                    ["首頁🏠"]
                 ], resize_keyboard=True))
 
     def login_kcoj(self, text):
@@ -85,7 +85,7 @@ class kuser:
             self.question = '題外'
             self.bot.sendMessage(self.chat_id, "郭老 Online Judge 離線中！",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
-                    ["主畫面🏠"]
+                    ["首頁🏠"]
                 ], resize_keyboard=True))
             return False
         elif result == True:
@@ -150,7 +150,7 @@ class kuser:
                                            "你今天寫扣了嗎？", # todo
                                            parse_mode='HTML',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                               ["主畫面🏠", "更新🔃"],
+                                               ["首頁🏠", "更新🔃"],
                                                ["登出🚪", "改密碼💱", "幫助📚"]
                                            ], resize_keyboard=True))
 
@@ -164,7 +164,7 @@ class kuser:
         self.bot.sendMessage(self.chat_id, q_str + "\n```\n" + content + "\n```",
             parse_mode='Markdown',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["主畫面🏠", "回題庫📝"],
+                ["首頁🏠", "題庫📝"],
                 ["交作業📮" if q[1] == '期限未到' else '', "看結果☑️" if q[2] == '已繳' else '', "通過者🌐"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
@@ -184,7 +184,7 @@ class kuser:
                                            "6. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利\n\n"
                                            "然後，附上厲害的 [郭老 Online Judge 傳送門](" + config.URL + ")", parse_mode='Markdown',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                               ["主畫面🏠"],
+                                               ["首頁🏠"],
                                                ["登出🚪", "改密碼💱", "幫助📚"]
                                            ], resize_keyboard=True) if self.status == '正常使用' else ReplyKeyboardRemove())
         self.bot.sendMessage(self.chat_id, "專案授權方式採用 GPLv3\n"
@@ -201,13 +201,13 @@ class kuser:
                                                    "可以使用「文字訊息」或是「傳送檔案」的方式", parse_mode='HTML',
                                                    reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                        ["刪除作業⚔️"] if self.api.list_questions()[self.question][2] == '已繳' else [],
-                                                       ["主畫面🏠", "回題目📜"]
+                                                       ["首頁🏠", "回題目📜"]
                                                    ], resize_keyboard=True))
 
     def send_answer(self, text, file_id):
         self.status = '正常使用'
         if text != '':
-            if text == '主畫面🏠':
+            if text == '首頁🏠':
                 if self.check_online() == True:
                     self.display_main()
                     return
@@ -218,7 +218,7 @@ class kuser:
             elif text == '刪除作業⚔️':
                 self.bot.sendMessage(self.chat_id, "移除成功" if self.api.delete_answer(self.question) == True else "移除失敗",
                     reply_markup=ReplyKeyboardMarkup(keyboard=[
-                        ["主畫面🏠", "回題目📜"],
+                        ["首頁🏠", "回題目📜"],
                         ["登出🚪", "改密碼💱", "幫助📚"]
                     ], resize_keyboard=True))
                 return
@@ -232,14 +232,14 @@ class kuser:
         if self.api.upload_answer(self.question, self.username + self.question + '.c') == True:
             self.bot.sendMessage(self.chat_id, "上傳成功",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
-                    ["主畫面🏠", "回題目📜"],
+                    ["首頁🏠", "回題目📜"],
                     ["看結果☑️"],
                     ["登出🚪", "改密碼💱", "幫助📚"]
                 ], resize_keyboard=True))
         else:
             self.bot.sendMessage(self.chat_id, "上傳失敗",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
-                    ["主畫面🏠", "回題目📜"],
+                    ["首頁🏠", "回題目📜"],
                     ["登出🚪", "改密碼💱", "幫助📚"]
                 ], resize_keyboard=True))
         os.remove(self.username + self.question + '.c')    
@@ -248,7 +248,7 @@ class kuser:
         self.status = '正常使用'
         self.bot.sendMessage(self.chat_id, "檔案不能超過 20 MB！上傳失敗",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["主畫面🏠", "回題目📜"],
+                ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
 
@@ -262,7 +262,7 @@ class kuser:
         self.bot.sendMessage(self.chat_id, q_str + "</code>", 
             parse_mode='HTML',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["主畫面🏠", "回題目📜"],
+                ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
 
@@ -278,7 +278,7 @@ class kuser:
         self.bot.sendMessage(self.chat_id, q_str, 
             parse_mode='HTML', 
             reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["主畫面🏠", "回題目📜"],
+                ["首頁🏠", "回題目📜"],
                 ["交作業📮" if q[1] == '期限未到' else '', "通過者🌐"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))

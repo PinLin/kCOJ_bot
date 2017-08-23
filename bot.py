@@ -10,53 +10,62 @@ from interface import kuser
 # configurations
 import config
 
+restart = False
+users = {}
+bot = telepot.Bot(config.TOKEN)
+
 def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
+    from_id = msg['from']['id'] 
     pprint(msg) # for debug
-    print(content_type, chat_type, chat_id) # for debug
+    print('content_type:', content_type) # for debug
+    print('chat_type:', chat_type) # for debug
+    print('chat_id:', chat_id) # for debug
+    print('from_id:', from_id) # for debug
 
     # create a user object
-    user = kuser(chat_id, bot)
-    if str(chat_id) in users:
-        user = users[str(chat_id)]
+    user = kuser(from_id, bot)
+    if str(from_id) in users:
+        user = users[str(from_id)]
     else:
-        users[str(chat_id)] = user
+        users[str(from_id)] = user
 
     if content_type == 'text':
         # pre-treat the command
         command = [msg['text']]
         if msg['text'][0] == '/':
             command = msg['text'].replace('_', ' ').lower().split(' ')
+            command = command.replace(config.NAME, '')
 
         # first-time user
-        if user.status == '第一次用':
+        if user.status == '第一次用' and chat_type == 'private':
             user.new_user()
 
         # press password
-        elif user.status == '輸入學號':
+        elif user.status == '輸入學號' and chat_type == 'private':
             user.press_password(msg['text'])
 
         # login
-        elif user.status == '輸入密碼':
+        elif user.status == '輸入密碼' and chat_type == 'private':
             user.login_kcoj(msg['text'])
 
-        elif user.status == '舊的密碼':    
+        elif user.status == '舊的密碼' and chat_type == 'private':
             if user.check_online() == True:
                 user.press_newpassword(msg['text'])
 
-        elif user.status == '修改密碼':
+        elif user.status == '修改密碼' and chat_type == 'private':
             if user.check_online() == True:
                 user.change_password(msg['text'])
 
-        elif user.status == '上傳答案':
+        elif user.status == '上傳答案' and chat_type == 'private':
             if user.check_online() == True:
                 user.send_answer(msg['text'], '')
 
-        elif command[0] == '/start' or command[0] == '主畫面🏠':
+        elif command[0] == '/start' or command[0] == '首頁🏠':
             if user.check_online() == True:
                 user.display_main()
 
-        elif command[0] == '/question' or command[0] == '題庫📝' or command[0] == '回題庫📝' or command[0] == '更新🔃':
+        elif command[0] == '/question' or command[0] == '題庫📝' or command[0] == '更新🔃':
             if user.check_online() == True:
                 if len(command) > 1:
                     user.display_question(command[1])
@@ -72,9 +81,14 @@ def on_chat(msg):
                 user.press_oldpassword()
 
         elif command[0] == '/logout' or command[0] == '登出🚪':
-            user = kuser(chat_id, bot)
-            users[str(chat_id)] = user
+            user = kuser(from_id, bot)
+            users[str(from_id)] = user
             user.logout_system()
+
+        elif command[0] == '/restart':
+            if from_id in config.ADMIN:
+                bot.sendMessage(chat_id, "即將重新啟動")
+                restart = True
 
         elif user.question != '題外':
             if user.check_online() == True:
@@ -96,14 +110,9 @@ def on_chat(msg):
                     user.fail_send()
                 else:
                     user.send_answer('', msg['document']['file_id'])
-        else:
-            bot.sendMessage(chat_id, "是擅長寫扣的朋友呢！")
-    else:
-        bot.sendMessage(chat_id, "我不是來看這些的。")
 
-users = {}
-bot = telepot.Bot(config.TOKEN)
 MessageLoop(bot, on_chat).run_as_thread()
+print("Start...")
 
 # for debug
 def main():
@@ -112,5 +121,7 @@ def main():
 if __name__ == '__main__':
     main()
     while True:
-        time.sleep(100)
+        if restart == True:
+            break
+        time.sleep(1)
         bot.getMe()
