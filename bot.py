@@ -22,6 +22,7 @@ def on_chat(msg):
     print('chat_type:', chat_type) # for debug
     print('chat_id:', chat_id) # for debug
     print('from_id:', from_id) # for debug
+    print() # for debug
 
     # create a user object
     user = kuser(from_id, bot)
@@ -35,7 +36,7 @@ def on_chat(msg):
         command = [msg['text']]
         if msg['text'][0] == '/':
             command = msg['text'].replace('_', ' ').lower().split(' ')
-            command = command.replace(config.NAME, '')
+            command[0] = command[0].replace(config.NAME, '')
 
         # first-time user
         if user.status == '第一次用' and chat_type == 'private':
