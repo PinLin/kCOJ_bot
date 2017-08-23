@@ -134,15 +134,16 @@ class kuser:
             q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
             q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
             q_str += "  /question_" + key + "\n\n"
-        self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
-                                           "➖➖➖➖➖\n"
-                                           "📝<i>所有作業</i>\n\n" + q_str + \
-                                           "➖➖➖➖➖\n" + choice(promote.sentences),
-                                           parse_mode='HTML',
-                                           reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                               ["首頁🏠", "更新🔃"],
-                                               ["登出🚪", "改密碼💱", "幫助📚"]
-                                           ], resize_keyboard=True))
+        reply = self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+                                                   "➖➖➖➖➖\n"
+                                                   "📝<i>所有作業</i>\n\n" + q_str + \
+                                                   "➖➖➖➖➖\n" + choice(promote.sentences),
+                                                   parse_mode='HTML',
+                                                   reply_markup=ReplyKeyboardMarkup(keyboard=[
+                                                       ["首頁🏠", "更新🔃"],
+                                                       ["登出🚪", "改密碼💱", "幫助📚"]
+                                                   ], resize_keyboard=True))
+        self.bot.sendMessage(self.chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
 
     def display_question(self, number):
         self.status = '查看題目'
@@ -154,13 +155,14 @@ class kuser:
         q_str += "📗" if q[1] == '期限未到' else "📕"
         q_str += "*" + number + "* (DL: " + q[0] + ")\n [[[" + q[2] + "]]]"
         q_str += "⚠️" if q[2] == '未繳' else "✅"
-        self.bot.sendMessage(self.chat_id, q_str + "\n\n```\n" + content + "\n```",
+        reply = self.bot.sendMessage(self.chat_id, q_str + "\n\n```\n" + content + "\n```",
             parse_mode='Markdown',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "題庫📝"],
                 ["交作業📮" if q[1] == '期限未到' else '', "看結果☑️" if q[2] == '已繳' else '', "通過者🌐"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
+        self.bot.sendMessage(self.chat_id, "點我到題目頂", reply_to_message_id=reply['message_id'])
 
     def help_you(self):
         self.question = '題外'
@@ -262,12 +264,13 @@ class kuser:
         q_str += "<code>\n"
         for passer in self.api.list_passers(self.question):
             q_str += "\n" + passer
-        self.bot.sendMessage(self.chat_id, q_str + "</code>", 
+        reply = self.bot.sendMessage(self.chat_id, q_str + "</code>", 
             parse_mode='HTML',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
+        self.bot.sendMessage(self.chat_id, "點我到名單頂", reply_to_message_id=reply['message_id'])
 
     def list_results(self):
         self.status = '正常使用'
