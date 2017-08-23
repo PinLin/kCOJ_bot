@@ -87,7 +87,7 @@ def on_chat(msg):
             user.logout_system()
 
         elif command[0] == '/restart':
-            if from_id in config.ADMIN:
+            if str(from_id) in config.ADMIN:
                 bot.sendMessage(chat_id, "即將重新啟動")
                 restart = True
 
