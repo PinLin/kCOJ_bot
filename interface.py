@@ -21,7 +21,6 @@ class kuser:
 
     def new_user(self):
         self.help_you()
-        self.bot.sendMessage(self.chat_id, "是初次見面的朋友呢，設定一下吧！", reply_markup=ReplyKeyboardRemove())
         self.press_username()
     
     def press_username(self):
@@ -109,20 +108,16 @@ class kuser:
         self.status = '正常使用'
         self.question = '題外'
         q_dict = self.api.list_questions()
-        q_available = "📝<i>可繳交的作業</i>\n\n"
-        q_unavailable = "📝<i>沒有可繳交的作業哦！</i>\n"
-        if q_dict == {}:
-            q_str = q_unavailable
-        else:
-            q_str = q_available
-            for key in q_dict.keys():
-                if q_dict[key][1] == '期限未到':
-                    q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]] /question_" + key
-                    q_str += " ⚠️\n\n" if q_dict[key][2] == '未繳' else " ✅\n\n"
-            if q_str == q_available:
-                q_str = q_unavailable
-        self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> /logout\n"
-                                           "➖➖➖➖➖\n" + q_str + "➖➖➖➖➖\n" + choice(promote.sentences),
+        q_str = ''
+        for key in q_dict.keys():
+            if q_dict[key][1] == '期限未到':
+                q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
+                q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
+                q_str += "  /question_" + key + "\n\n"
+        self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+                                           "➖➖➖➖➖\n"
+                                           "📝<i>可繳交的作業</i>\n\n" + q_str + \
+                                           "➖➖➖➖➖\n" + choice(promote.sentences),
                                            parse_mode='HTML',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                ["題庫📝"],
@@ -136,14 +131,10 @@ class kuser:
         q_str = ''
         for key in q_dict.keys():
             q_str += "📗" if q_dict[key][1] == '期限未到' else "📕"
-            q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]] /question_" + key
-            if q_dict[key][1] == '期限未到':
-                if q_dict[key][2] == '未繳':
-                    q_str += " ⚠️"
-                else:
-                    q_str += " ✅"
-            q_str += "\n\n"
-        self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> /logout\n"
+            q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
+            q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
+            q_str += "  /question_" + key + "\n\n"
+        self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
                                            "➖➖➖➖➖\n"
                                            "📝<i>所有作業</i>\n\n" + q_str + \
                                            "➖➖➖➖➖\n" + choice(promote.sentences),
@@ -158,9 +149,12 @@ class kuser:
         self.question = number
         content = self.api.show_question(number)
         q = self.api.list_questions()[number]
-        q_str = "📗" if q[1] == '期限未到' else "📕"
-        q_str += "**" + number + "** (到 " + q[0] + ")\n [[" + q[2] + "]]\n"
-        self.bot.sendMessage(self.chat_id, q_str + "\n```\n" + content + "\n```",
+        q_str = "💁 *" + self.username + "* [" + config.NAME + "]\n"
+        q_str += "➖➖➖➖➖\n"
+        q_str += "📗" if q[1] == '期限未到' else "📕"
+        q_str += "*" + number + "* (DL: " + q[0] + ")\n [[[" + q[2] + "]]]"
+        q_str += "⚠️" if q[2] == '未繳' else "✅"
+        self.bot.sendMessage(self.chat_id, q_str + "\n\n```\n" + content + "\n```",
             parse_mode='Markdown',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "題庫📝"],
@@ -171,32 +165,38 @@ class kuser:
     def help_you(self):
         self.question = '題外'
         self.bot.sendMessage(self.chat_id, "這裡是 kC Online Judge Bot！\n"
-                                           "可以簡稱 kCOJ Bot，目前定居於 `@kcoj_bot`\n"
+                                           "可以簡稱 kCOJ Bot，目前定居於 [" + config.NAME + "]\n"
                                            "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
+                                           "➡️[傳送門](" + config.URL + ")\n"
                                            "操作很簡單（？）\n\n"
                                            "還是稍微提幾個需要注意的地方：\n"
                                            "1. 📗代表還可以繳交的作業，📕代表已經不能繳交的作業\n"
-                                           "2. 其實在查看題目的畫面就可以用「拖曳」的方式 **上傳作業📮**\n"
-                                           "3. **刪除作業⚔️** 的功能被放在 **上傳作業📮** 裡面\n"
-                                           "4. 學號與密碼將以「明文」方式儲存\n"
-                                           "5. 郭老的 Online Judge 其實也是以「明文」方式儲存您的帳號密碼\n"
-                                           "6. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利\n\n"
-                                           "然後，附上厲害的 [郭老 Online Judge 傳送門](" + config.URL + ")", parse_mode='Markdown',
+                                           "2. ⚠️代表還沒有繳交的作業，✅代表已經繳交的作業\n"
+                                           "3. 其實在查看題目的畫面就可以用「拖曳」的方式 *上傳作業📮*\n"
+                                           "4. *刪除作業⚔️* 的功能被放在 *上傳作業📮* 裡面\n"
+                                           "5. 學號與密碼將以「明文」方式儲存\n"
+                                           "6. 郭老的 Online Judge 其實也是以「明文」方式儲存您的帳號密碼\n"
+                                           "7. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利\n\n"
+                                           "本專案授權方式採用 GPLv3\n"
+                                           "非常歡迎發 issue 送 PR owooo\n"
+                                           "原始碼被託管於 GitHub，大大們有空的話可以按個星星支持一下> </\n"
+                                           "網址如下：\n"
+                                           "[https://github.com/PinLin/kcoj_bot]\n\n",
+                                           parse_mode='Markdown',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                ["首頁🏠"],
                                                ["登出🚪", "改密碼💱", "幫助📚"]
                                            ], resize_keyboard=True) if self.status == '正常使用' else ReplyKeyboardRemove())
-        self.bot.sendMessage(self.chat_id, "專案授權方式採用 GPLv3\n"
-                                           "非常歡迎發 issue 送 PR owooo\n"
-                                           "原始碼被託管於 GitHub，大大們有空的話可以按個星星支持一下> <網址如下：\n"
-                                           "https://github.com/PinLin/kcoj_bot")
 
     def upload_answer(self):
         self.status = '上傳答案'
         q = self.api.list_questions()[self.question]
-        q_str = "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (到 " + q[0] + ")\n [[" + q[2] + "]]\n"
-        self.bot.sendMessage(self.chat_id, q_str + "\n現在請把你的程式碼讓我看看（請別超過 20 MB）\n"
+        q_str = "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+        q_str += "➖➖➖➖➖\n"
+        q_str += "📗" if q[1] == '期限未到' else "📕"
+        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
+        q_str += "⚠️" if q[2] == '未繳' else "✅"
+        self.bot.sendMessage(self.chat_id, q_str + "\n\n現在請把你的程式碼讓我看看（請別超過 20 MB）\n"
                                                    "可以使用「文字訊息」或是「傳送檔案」的方式", parse_mode='HTML',
                                                    reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                        ["刪除作業⚔️"] if self.api.list_questions()[self.question][2] == '已繳' else [],
@@ -254,8 +254,12 @@ class kuser:
     def list_passers(self):
         self.status = '正常使用'
         q = self.api.list_questions()[self.question]
-        q_str = "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (到 " + q[0] + ")\n [[" + q[2] + "]]\n<code>"
+        q_str = "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+        q_str += "➖➖➖➖➖\n"
+        q_str += "📗" if q[1] == '期限未到' else "📕"
+        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
+        q_str += "⚠️" if q[2] == '未繳' else "✅"
+        q_str += "<code>\n"
         for passer in self.api.list_passers(self.question):
             q_str += "\n" + passer
         self.bot.sendMessage(self.chat_id, q_str + "</code>", 
@@ -268,8 +272,10 @@ class kuser:
     def list_results(self):
         self.status = '正常使用'
         q = self.api.list_questions()[self.question]
-        q_str = "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (到 " + q[0] + ")\n"
+        q_str = "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+        q_str += "➖➖➖➖➖\n"
+        q_str += "📗" if q[1] == '期限未到' else "📕"
+        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n"
         for result in self.api.list_results(self.question, self.username):
             q_str += "\n測試編號 <code>" + result[0] + "</code>："
             q_str += "✔️ " if result[1] == '通過測試' else "❌ "
