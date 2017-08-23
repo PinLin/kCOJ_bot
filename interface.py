@@ -3,10 +3,11 @@
 # necessary modules
 import os, requests, telepot
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from random import choice
 # kCOJ API
 import access
 # configurations
-import config
+import config, promote
 
 class kuser:
     def __init__(self, chat_id, bot):
@@ -121,8 +122,7 @@ class kuser:
             if q_str == q_available:
                 q_str = q_unavailable
         self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> /logout\n"
-                                           "➖➖➖➖➖\n" + q_str + "➖➖➖➖➖\n"
-                                           "你今天寫扣了嗎？", # todo
+                                           "➖➖➖➖➖\n" + q_str + "➖➖➖➖➖\n" + choice(promote.sentences),
                                            parse_mode='HTML',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                ["題庫📝"],
@@ -146,8 +146,7 @@ class kuser:
         self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> /logout\n"
                                            "➖➖➖➖➖\n"
                                            "📝<i>所有作業</i>\n\n" + q_str + \
-                                           "➖➖➖➖➖\n"
-                                           "你今天寫扣了嗎？", # todo
+                                           "➖➖➖➖➖\n" + choice(promote.sentences),
                                            parse_mode='HTML',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                ["首頁🏠", "更新🔃"],
