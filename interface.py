@@ -143,7 +143,7 @@ class kuser:
                                                        ["首頁🏠", "更新🔃"],
                                                        ["登出🚪", "改密碼💱", "幫助📚"]
                                                    ], resize_keyboard=True) if chat_id == self.from_id else ReplyKeyboardRemove())
-        self.bot.sendMessage(self.from_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
+        self.bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
 
     def display_question(self, chat_id, number):
         self.status = '查看題目'
