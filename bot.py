@@ -110,7 +110,10 @@ def on_chat(msg):
                     user.list_passers()
                 elif command[0] == '回題目📜':
                     user.display_question(chat_id ,user.question)
-
+        else:
+            if chat_type == 'private':
+                bot.sendMessage(chat_id, "(ˊ・ω・ˋ)")
+            
     elif content_type == 'document':
         if user.status == '上傳答案' or user.status == '查看題目':
             if user.check_online() == True:
