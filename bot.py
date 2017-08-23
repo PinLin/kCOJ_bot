@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # necessary modules
-import time, requests, telepot
+import os, time, requests, telepot
 from telepot.loop import MessageLoop
 from pprint import pprint
 # kCOJ API
@@ -10,7 +10,6 @@ from interface import kuser
 # configurations
 import config
 
-restart = False
 users = {}
 bot = telepot.Bot(config.TOKEN)
 
@@ -86,10 +85,11 @@ def on_chat(msg):
             users[str(from_id)] = user
             user.logout_system()
 
-        elif command[0] == '/restart':
+        elif command[0] == '/update':
             if str(from_id) in config.ADMIN:
-                bot.sendMessage(chat_id, "即將重新啟動")
-                restart = True
+                bot.sendMessage(chat_id, "即將更新並重新啟動")
+                time.sleep(1)
+                os._exit(0)
 
         elif user.question != '題外':
             if user.check_online() == True:
@@ -120,7 +120,5 @@ def main():
 if __name__ == '__main__':
     main()
     while True:
-        if restart == True:
-            break
         time.sleep(1)
         bot.getMe()
