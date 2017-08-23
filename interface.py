@@ -115,14 +115,14 @@ class kuser:
                 q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
                 q_str += "  /question_" + key + "\n\n"
         self.bot.sendMessage(chat_id, "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
-                                           "➖➖➖➖➖\n"
-                                           "📝<i>可繳交的作業</i>\n\n" + q_str + \
-                                           "➖➖➖➖➖\n" + choice(promote.sentences),
-                                           parse_mode='HTML',
-                                           reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                               ["題庫📝"],
-                                               ["登出🚪", "改密碼💱", "幫助📚"]
-                                           ], resize_keyboard=True) if chat_id == self.from_id else ReplyKeyboardRemove())
+                                      "➖➖➖➖➖\n"
+                                      "📝<i>可繳交的作業</i>\n\n" + q_str + \
+                                      "➖➖➖➖➖\n" + choice(promote.sentences),
+                                      parse_mode='HTML',
+                                      reply_markup=ReplyKeyboardMarkup(keyboard=[
+                                          ["題庫📝"],
+                                          ["登出🚪", "改密碼💱", "幫助📚"]
+                                      ], resize_keyboard=True) if chat_id == self.from_id else ReplyKeyboardRemove())
 
     def display_questions(self, chat_id):
         self.status = '正常使用'
@@ -135,14 +135,14 @@ class kuser:
             q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
             q_str += "  /question_" + key + "\n\n"
         reply = self.bot.sendMessage(chat_id, "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
-                                                   "➖➖➖➖➖\n"
-                                                   "📝<i>所有作業</i>\n\n" + q_str + \
-                                                   "➖➖➖➖➖\n" + choice(promote.sentences),
-                                                   parse_mode='HTML',
-                                                   reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                                       ["首頁🏠", "更新🔃"],
-                                                       ["登出🚪", "改密碼💱", "幫助📚"]
-                                                   ], resize_keyboard=True) if chat_id == self.from_id else ReplyKeyboardRemove())
+                                              "➖➖➖➖➖\n"
+                                              "📝<i>所有作業</i>\n\n" + q_str + \
+                                              "➖➖➖➖➖\n" + choice(promote.sentences),
+                                              parse_mode='HTML',
+                                              reply_markup=ReplyKeyboardMarkup(keyboard=[
+                                                  ["首頁🏠", "更新🔃"],
+                                                  ["登出🚪", "改密碼💱", "幫助📚"]
+                                              ], resize_keyboard=True) if chat_id == self.from_id else ReplyKeyboardRemove())
         self.bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
 
     def display_question(self, chat_id, number):
