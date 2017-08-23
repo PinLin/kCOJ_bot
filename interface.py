@@ -19,6 +19,7 @@ class kuser:
         self.api = access.kuser_api()
 
     def new_user(self):
+        self.help_you()
         self.bot.sendMessage(self.chat_id, "是初次見面的朋友呢，設定一下吧！", reply_markup=ReplyKeyboardRemove())
         self.press_username()
     
@@ -110,12 +111,13 @@ class kuser:
             q_str = q_available
             for key in q_dict.keys():
                 if q_dict[key][1] == '期限未到':
-                    q_str += "📗<b>" + key + "</b> (到 " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]] /question_" + key + "\n\n"
+                    q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]] /question_" + key
+                    q_str += " ⚠️\n\n" if q_dict[key][2] == '未繳' else " ✅\n\n"
             if q_str == q_available:
                 q_str = q_unavailable
         self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> /logout\n"
                                            "➖➖➖➖➖\n" + q_str + "➖➖➖➖➖\n"
-                                           "你今天寫扣了嗎？",
+                                           "你今天寫扣了嗎？", # todo
                                            parse_mode='HTML',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                ["題庫📝"],
@@ -129,12 +131,18 @@ class kuser:
         q_str = ''
         for key in q_dict.keys():
             q_str += "📗" if q_dict[key][1] == '期限未到' else "📕"
-            q_str += "<b>" + key + "</b> (到 " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]] /question_" + key + "\n\n"
+            q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]] /question_" + key
+            if q_dict[key][1] == '期限未到':
+                if q_dict[key][2] == '未繳':
+                    q_str += " ⚠️"
+                else:
+                    q_str += " ✅"
+            q_str += "\n\n"
         self.bot.sendMessage(self.chat_id, "💁 <b>" + self.username + "</b> /logout\n"
                                            "➖➖➖➖➖\n"
                                            "📝<i>所有作業</i>\n\n" + q_str + \
                                            "➖➖➖➖➖\n"
-                                           "你今天寫扣了嗎？", 
+                                           "你今天寫扣了嗎？", # todo
                                            parse_mode='HTML',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                ["主畫面🏠", "更新🔃"],
@@ -157,25 +165,23 @@ class kuser:
             ], resize_keyboard=True))
 
     def help_you(self):
-        self.status = '正常使用'
         self.question = '題外'
         self.bot.sendMessage(self.chat_id, "這裡是 kC Online Judge Bot！\n"
-                                           "可以簡稱我為 kCOJ Bot，目前定居於 `@kcoj_bot`\n"
+                                           "可以簡稱 kCOJ Bot，目前定居於 `@kcoj_bot`\n"
                                            "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
                                            "操作很簡單（？）\n\n"
                                            "還是稍微提幾個需要注意的地方：\n"
-                                           "1. 太久沒有用點下去反應會有點慢，可能要等一下\n"
-                                           "2. 📗代表還可以繳交的作業，📕代表已經不能繳交的作業\n"
-                                           "3. 其實在查看題目的畫面就可以用「拖曳」的方式 上傳作業📮\n"
-                                           "4. 刪除作業⚔️ 的功能被放在 上傳作業📮 裡面\n"
-                                           "5. 學號與密碼將以「明文」方式儲存在記憶體，不會儲存在硬碟中\n"
-                                           "6. 郭老的 Online Judge 其實也是以「明文」的方式存您的帳號密碼哦\n"
-                                           "7. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利\n\n"
+                                           "1. 📗代表還可以繳交的作業，📕代表已經不能繳交的作業\n"
+                                           "2. 其實在查看題目的畫面就可以用「拖曳」的方式 **上傳作業📮**\n"
+                                           "3. **刪除作業⚔️** 的功能被放在 **上傳作業📮** 裡面\n"
+                                           "4. 學號與密碼將以「明文」方式儲存\n"
+                                           "5. 郭老的 Online Judge 其實也是以「明文」方式儲存您的帳號密碼\n"
+                                           "6. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利\n\n"
                                            "然後，附上厲害的 [郭老 Online Judge 傳送門](" + config.URL + ")", parse_mode='Markdown',
                                            reply_markup=ReplyKeyboardMarkup(keyboard=[
                                                ["主畫面🏠"],
                                                ["登出🚪", "改密碼💱", "幫助📚"]
-                                           ], resize_keyboard=True))
+                                           ], resize_keyboard=True) if self.status == '正常使用' else ReplyKeyboardRemove())
         self.bot.sendMessage(self.chat_id, "專案授權方式採用 GPLv3\n"
                                            "非常歡迎發 issue 送 PR owooo\n"
                                            "原始碼被託管於 GitHub，大大們有空的話可以按個星星支持一下> <網址如下：\n"
