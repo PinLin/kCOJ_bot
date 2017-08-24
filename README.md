@@ -13,6 +13,14 @@ It runs as [@kcoj_bot](https://telegram.me/kcoj_bot) now.
   - requests
   - beautifulsoup
 
+## Usage
+
+Like this:
+
+```bash
+while true; do git pull; python3 bot.py; done
+```
+
 ## License
 
 GPLv3
