@@ -124,13 +124,6 @@ def on_chat(msg):
 
 MessageLoop(bot, on_chat).run_as_thread()
 print("Started! Service is available.")
-
-# for debug
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()
-    while True:
-        time.sleep(1)
-        bot.getMe()
+while True:
+    time.sleep(1)
+    bot.getMe()
