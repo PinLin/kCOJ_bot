@@ -75,37 +75,42 @@ class kuser:
         self.question = '題外'
         self.password = text
         bot.sendMessage(self.userid, "登入中...", reply_markup=ReplyKeyboardRemove())
-        if self.check_online() == True:
+        if self.check_online(self.userid) == True:
             self.display_main(self.userid)
 
-    def fail_login(self):
+    def fail_login(self, chat_id, message_id):
         self.status = '正常使用'
         self.question = '題外'
-        bot.sendMessage(self.userid, "哇...登入失敗，讓我們重新開始一次", reply_markup=ReplyKeyboardRemove())
+        if chat_id != self.userid:
+            bot.sendMessage(chat_id, "登入失敗，請先私訊我重新登入 kCOJ", reply_to_message_id=message_id)
+        bot.sendMessage(self.userid, "哇...登入失敗，讓我們重新開始", reply_markup=ReplyKeyboardRemove())
         self.press_username()
+        
+    def fail_connecting(self, chat_id, message_id):
+        self.status = '正常使用'
+        self.question = '題外'
+        if chat_id != self.userid:
+            bot.sendMessage(chat_id, "kCOJ 離線中！", reply_to_message_id=message_id)
+        else:
+            bot.sendMessage(self.userid, "kCOJ 離線中！",
+                reply_markup=ReplyKeyboardMarkup(keyboard=[
+                    ["首頁🏠"]
+                ], resize_keyboard=True))
 
-    def check_online(self):
+    def check_online(self, chat_id, message_id=''):
         result = self.api.check_online()
         if result == None:
-            self.fail_connecting()
+            self.fail_connecting(chat_id, message_id)
             return False
         else:
             if result == False:
                 self.api.login_kcoj(self.username, self.password)
                 result = self.api.check_online()
             if result == False:
-                self.fail_login()
+                self.fail_login(chat_id, message_id)
             elif result == None:
-                self.fail_connecting()
+                self.fail_connecting(chat_id, message_id)
             return result == True
-        
-    def fail_connecting(self):
-        self.status = '正常使用'
-        self.question = '題外'
-        bot.sendMessage(self.userid, "郭老 Online Judge 離線中！",
-            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["首頁🏠"]
-            ], resize_keyboard=True))
 
     def logout_system(self):
         self.status = '正常使用'
@@ -154,7 +159,7 @@ class kuser:
                                          ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove())
         bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
 
-    def display_question(self, chat_id, number):
+    def display_question(self, number, chat_id):
         self.status = '查看題目'
         self.question = number
         content = self.api.show_question(number)
