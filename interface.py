@@ -217,25 +217,9 @@ class kuser:
     def send_answer(self, text, file_id):
         self.status = '正常使用'
         if text != '':
-            if text == '首頁🏠':
-                if self.check_online() == True:
-                    self.display_main(self.userid)
-                    return
-            elif text == '回題目📜':
-                if self.check_online() == True:
-                    self.display_question(self.question)
-                    return
-            elif text == '刪除作業⚔️':
-                bot.sendMessage(self.userid, "移除成功" if self.api.delete_answer(self.question) == True else "移除失敗",
-                    reply_markup=ReplyKeyboardMarkup(keyboard=[
-                        ["首頁🏠", "回題目📜"],
-                        ["登出🚪", "改密碼💱", "幫助📚"]
-                    ], resize_keyboard=True))
-                return
-            else:
-                f = open(self.username + self.question + '.c', 'w')
-                f.write(text)
-                f.close()
+            f = open(self.username + self.question + '.c', 'w')
+            f.write(text)
+            f.close()
         else:
             bot.download_file(file_id, self.username + self.question + '.c')
         self.api.delete_answer(self.question)
@@ -254,6 +238,13 @@ class kuser:
                 ], resize_keyboard=True))
         os.remove(self.username + self.question + '.c')    
     
+    def delete_answer(self):
+        bot.sendMessage(self.userid, "移除成功" if self.api.delete_answer(self.question) == True else "移除失敗",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[
+                ["首頁🏠", "回題目📜"],
+                ["登出🚪", "改密碼💱", "幫助📚"]
+            ], resize_keyboard=True))
+
     def fail_send(self):
         self.status = '正常使用'
         bot.sendMessage(self.userid, "檔案不能超過 20 MB！上傳失敗",

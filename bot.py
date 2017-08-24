@@ -89,9 +89,9 @@ def on_chat(msg):
                 users[str(from_id)] = user
                 user.logout_system()
 
-            elif command[0] == '回題目📜' and user.question != '題外':
+            elif (command[0] == '/delete' or command[0] == '刪除作業⚔️') and user.question != '題外':
                 if user.check_online() == True:
-                    user.display_question(chat_id ,user.question)
+                    user.delete_answer()
 
             elif (command[0] == '/upload' or command[0] == '交作業📮') and user.question != '題外':
                 if user.check_online() == True:
@@ -104,6 +104,10 @@ def on_chat(msg):
             elif (command[0] == '/passer' or command[0] == '通過者🌐') and user.question != '題外':
                 if user.check_online() == True:
                     user.list_passers()
+
+            elif command[0] == '回題目📜' and user.question != '題外':
+                if user.check_online() == True:
+                    user.display_question(chat_id ,user.question)
 
             elif user.status == '舊的密碼':
                 if user.check_online() == True:
