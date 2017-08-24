@@ -16,12 +16,12 @@ bot = telepot.Bot(config.TOKEN)
 def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     from_id = msg['from']['id'] 
-    pprint(msg) # for debug
-    print('content_type:', content_type) # for debug
-    print('chat_type:', chat_type) # for debug
-    print('chat_id:', chat_id) # for debug
-    print('from_id:', from_id) # for debug
-    print() # for debug
+    pprint(msg)
+    print('content_type:', content_type)
+    print('chat_type:', chat_type)
+    print('chat_id:', chat_id)
+    print('from_id:', from_id)
+    print()
 
     # create a user object
     user = kuser(from_id)
@@ -57,18 +57,6 @@ def on_chat(msg):
             else:
                 bot.sendMessage(chat_id, "請先私訊我登入 kCOJ", reply_to_message_id=msg['message_id'])
 
-        elif user.status == '舊的密碼' and chat_type == 'private':
-            if user.check_online() == True:
-                user.press_newpassword(msg['text'])
-
-        elif user.status == '修改密碼' and chat_type == 'private':
-            if user.check_online() == True:
-                user.change_password(msg['text'])
-
-        elif user.status == '上傳答案' and chat_type == 'private':
-            if user.check_online() == True:
-                user.send_answer(msg['text'], '')
-        
         elif command[0] == '/start' or command[0] == '首頁🏠':
             if user.check_online() == True:
                 user.display_main(chat_id)
@@ -87,32 +75,51 @@ def on_chat(msg):
                 time.sleep(1)
                 os._exit(0)
 
-        elif (command[0] == '/help' or command[0] == '幫助📚') and chat_type == 'private':
-            if user.check_online() == True:
-                user.help_you()
+        elif chat_type == 'private':
+            if command[0] == '/help' or command[0] == '幫助📚':
+                if user.check_online() == True:
+                    user.help_you()
 
-        elif (command[0] == '/password' or command[0] == '改密碼💱') and chat_type == 'private':
-            if user.check_online() == True:
-                user.press_oldpassword()
+            elif command[0] == '/password' or command[0] == '改密碼💱':
+                if user.check_online() == True:
+                    user.press_oldpassword()
 
-        elif (command[0] == '/logout' or command[0] == '登出🚪') and chat_type == 'private':
-            user = kuser(from_id)
-            users[str(from_id)] = user
-            user.logout_system()
+            elif command[0] == '/logout' or command[0] == '登出🚪':
+                user = kuser(from_id)
+                users[str(from_id)] = user
+                user.logout_system()
 
-        elif user.question != '題外':
-            if user.check_online() == True:
-                if (command[0] == '/upload' or command[0] == '交作業📮') and chat_type == 'private':
-                    user.upload_answer()
-                elif (command[0] == '/result' or command[0] == '看結果☑️') and chat_type == 'private':
-                    user.list_results()
-                elif (command[0] == '/passer' or command[0] == '通過者🌐') and chat_type == 'private':
-                    user.list_passers()
-                elif command[0] == '回題目📜':
+            elif command[0] == '回題目📜' and user.question != '題外':
+                if user.check_online() == True:
                     user.display_question(chat_id ,user.question)
-        else:
-            if chat_type == 'private':
-                bot.sendMessage(chat_id, "(ˊ・ω・ˋ)")
+
+            elif (command[0] == '/upload' or command[0] == '交作業📮') and user.question != '題外':
+                if user.check_online() == True:
+                    user.upload_answer()
+
+            elif (command[0] == '/result' or command[0] == '看結果☑️') and user.question != '題外':
+                if user.check_online() == True:
+                    user.list_results()
+
+            elif (command[0] == '/passer' or command[0] == '通過者🌐') and user.question != '題外':
+                if user.check_online() == True:
+                    user.list_passers()
+
+            elif user.status == '舊的密碼':
+                if user.check_online() == True:
+                    user.press_newpassword(msg['text'])
+
+            elif user.status == '修改密碼':
+                if user.check_online() == True:
+                    user.change_password(msg['text'])
+
+            elif user.status == '上傳答案':
+                if user.check_online() == True:
+                    user.send_answer(msg['text'], '')
+
+            else:
+                if user.check_online() == True:
+                    bot.sendMessage(chat_id, "(ˊ・ω・ˋ)")
             
     elif content_type == 'document':
         if user.status == '上傳答案' or user.status == '查看題目':

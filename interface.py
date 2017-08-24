@@ -45,25 +45,30 @@ class kuser:
             ], resize_keyboard=True))
 
     def press_newpassword(self, text):
-        self.status = '修改密碼'
-        self.question = '題外'
         if text != self.password:
-            self.display_main(self.userid)
+            self.status = '正常使用'
+            self.question = '題外'
+            bot.sendMessage(self.userid, "密碼錯誤！",
+                reply_markup=ReplyKeyboardMarkup(keyboard=[
+                    ["首頁🏠"]
+                ], resize_keyboard=True))
         else:
+            self.status = '修改密碼'
+            self.question = '題外'
             bot.sendMessage(self.userid, "使用此功能請務必小心！\n"
-                                         "請輸入要設定的新密碼：", reply_markup=ReplyKeyboardRemove())
+                                         "請輸入要設定的新密碼：",
+                reply_markup=ReplyKeyboardMarkup(keyboard=[
+                    ["首頁🏠"]
+                ], resize_keyboard=True))
         
     def change_password(self, text):
         self.status = '正常使用'
         self.question = '題外'
-        if text == "首頁🏠":
-            self.display_main(self.userid)
-        else:
-            self.password = text
-            bot.sendMessage(self.userid, "修改成功" if self.api.change_password(self.password) == True else "修改失敗",
-                reply_markup=ReplyKeyboardMarkup(keyboard=[
-                    ["首頁🏠"]
-                ], resize_keyboard=True))
+        self.password = text
+        bot.sendMessage(self.userid, "修改成功！" if self.api.change_password(self.password) == True else "修改失敗。",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[
+                ["首頁🏠"]
+            ], resize_keyboard=True))
 
     def login_kcoj(self, text):
         self.status = '正常使用'
@@ -79,25 +84,28 @@ class kuser:
         bot.sendMessage(self.userid, "哇...登入失敗，讓我們重新開始一次", reply_markup=ReplyKeyboardRemove())
         self.press_username()
 
-    def check_online(self): # edit
-        self.status = '正常使用'
+    def check_online(self):
         result = self.api.check_online()
         if result == None:
-            self.question = '題外'
-            bot.sendMessage(self.userid, "郭老 Online Judge 離線中！",
-                reply_markup=ReplyKeyboardMarkup(keyboard=[
-                    ["首頁🏠"]
-                ], resize_keyboard=True))
+            self.fail_connecting()
             return False
-        elif result == True:
-            return True
         else:
-            self.api.login_kcoj(self.username, self.password)
-            if self.api.check_online() == False:
+            if result == False:
+                self.api.login_kcoj(self.username, self.password)
+                result = self.api.check_online()
+            if result == False:
                 self.fail_login()
-                return False
-            else:
-                return True
+            elif result == None:
+                self.fail_connecting()
+            return result == True
+        
+    def fail_connecting(self):
+        self.status = '正常使用'
+        self.question = '題外'
+        bot.sendMessage(self.userid, "郭老 Online Judge 離線中！",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[
+                ["首頁🏠"]
+            ], resize_keyboard=True))
 
     def logout_system(self):
         self.status = '正常使用'
