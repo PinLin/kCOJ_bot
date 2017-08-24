@@ -75,6 +75,11 @@ def on_chat(msg):
                 time.sleep(1)
                 os._exit(0)
 
+        elif command[0] == '/ping':
+            bot.sendMessage(chat_id, "*PONG*",
+            parse_mode='Markdown',
+            reply_to_message_id=msg['message_id'])
+
         elif chat_type == 'private':
             if command[0] == '/help' or command[0] == '幫助📚':
                 if user.check_online() == True:
