@@ -24,7 +24,7 @@ def on_chat(msg):
     print() # for debug
 
     # create a user object
-    user = kuser(from_id, bot)
+    user = kuser(from_id)
     if str(from_id) in users:
         user = users[str(from_id)]
     else:
@@ -96,7 +96,7 @@ def on_chat(msg):
                 user.press_oldpassword()
 
         elif (command[0] == '/logout' or command[0] == '登出🚪') and chat_type == 'private':
-            user = kuser(from_id, bot)
+            user = kuser(from_id)
             users[str(from_id)] = user
             user.logout_system()
 
