@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # necessary modules
-import os, time, requests, telepot
+import os, time, json, requests, telepot
 from telepot.loop import MessageLoop
 from pprint import pprint
 # kCOJ API
@@ -138,8 +138,29 @@ def on_chat(msg):
                 else:
                     user.send_answer('', msg['document']['file_id'])
 
+# restore
+with open('users.json', 'r') as f:
+    users_restore = json.load(f)
+    for key in users_restore.keys():
+        user = users_restore[key]
+        users[key] = kuser(user['userid'], user['username'], user['password'], user['status'], user['question'])
+
 MessageLoop(bot, on_chat).run_as_thread()
 print("Started! Service is available.")
 while True:
     time.sleep(1)
     bot.getMe()
+
+    # backup
+    users_backup = {}
+    for key in users.keys():
+        user = users[key]
+        users_backup[key] = {
+            'userid': user.userid,
+            'username': user.username,
+            'password': user.password,
+            'status': user.status,
+            'question': user.question
+        }
+    with open('users.json', 'w') as f:
+        json.dump(users_backup, f)
