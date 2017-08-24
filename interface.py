@@ -222,9 +222,8 @@ class kuser:
     def send_answer(self, text, file_id):
         self.status = '正常使用'
         if text != '':
-            f = open(self.username + self.question + '.c', 'w')
-            f.write(text)
-            f.close()
+            with open(self.username + self.question + '.c', 'w') as f:
+                f.write(text)
         else:
             bot.download_file(file_id, self.username + self.question + '.c')
         self.api.delete_answer(self.question)
