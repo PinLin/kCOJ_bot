@@ -6,12 +6,11 @@ from telepot.loop import MessageLoop
 from pprint import pprint
 # kCOJ API
 import access
-from interface import kuser
+from interface import kuser, bot
 # configurations
 import config
 
 users = {}
-bot = telepot.Bot(config.TOKEN)
 
 def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
@@ -147,9 +146,13 @@ with open('users.json', 'r') as f:
 
 MessageLoop(bot, on_chat).run_as_thread()
 print("Started! Service is available.")
+count = 0
 while True:
     time.sleep(1)
-    bot.getMe()
+    count += 1
+    if count == 5:
+        bot.getMe()
+        count = 0
 
     # backup
     users_backup = {}
