@@ -1,4 +1,4 @@
-# kCOJ_bot
+# kCOJ Bot
 
 Telegram Bot that is for students in The Great NTUT CSIE. 
 
@@ -11,7 +11,7 @@ It runs as [@kcoj_bot](https://telegram.me/kcoj_bot) now.
 - Python 3.6
   - telepot
   - requests
-  - beautifulsoup
+  - BeautifulSoup 4
 
 ## Usage
 
