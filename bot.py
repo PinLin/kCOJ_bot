@@ -81,8 +81,7 @@ def on_chat(msg):
 
         elif chat_type == 'private':
             if command[0] == '/help' or command[0] == '幫助📚':
-                if user.check_online(chat_id, msg['message_id']) == True:
-                    user.help_you()
+                user.help_you()
 
             elif command[0] == '/password' or command[0] == '改密碼💱':
                 if user.check_online(chat_id, msg['message_id']) == True:

@@ -200,8 +200,7 @@ class kuser:
                                      "[https://github.com/PinLin/kcoj_bot]\n\n",
                                      parse_mode='Markdown',
                                      reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                         ["首頁🏠"],
-                                         ["登出🚪", "改密碼💱", "幫助📚"]
+                                         ["首頁🏠"]
                                      ], resize_keyboard=True) if not self.status == '第一次用' else ReplyKeyboardRemove())
 
     def upload_answer(self):
