@@ -202,7 +202,7 @@ class kuser:
                                      reply_markup=ReplyKeyboardMarkup(keyboard=[
                                          ["首頁🏠"],
                                          ["登出🚪", "改密碼💱", "幫助📚"]
-                                     ], resize_keyboard=True) if self.status == '正常使用' else ReplyKeyboardRemove())
+                                     ], resize_keyboard=True) if not self.status == '第一次用' else ReplyKeyboardRemove())
 
     def upload_answer(self):
         self.status = '上傳答案'
