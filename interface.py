@@ -90,11 +90,11 @@ class kuser:
         self.status = '正常使用'
         self.question = '題外'
         if chat_id != self.userid:
-            bot.sendMessage(chat_id, "kCOJ 離線中！", reply_to_message_id=message_id)
+            bot.sendMessage(chat_id, "kCOJ 離線中！請稍後再試", reply_to_message_id=message_id)
         else:
-            bot.sendMessage(self.userid, "kCOJ 離線中！",
+            bot.sendMessage(self.userid, "kCOJ 離線中！請稍後再試",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
-                    ["首頁🏠"]
+                    ["首頁🏠", "幫助📚"]
                 ], resize_keyboard=True))
 
     def check_online(self, chat_id, message_id=''):
