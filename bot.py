@@ -165,4 +165,4 @@ while True:
             'question': user.question
         }
     with open('users.json', 'w') as f:
-        json.dump(users_backup, f)
+        json.dump(users_backup, f, indent='    ')
