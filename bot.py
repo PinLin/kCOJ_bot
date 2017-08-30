@@ -35,8 +35,14 @@ def on_chat(msg):
         if msg['text'].startswith('/'):
             command = msg['text'].replace(config.NAME, '').replace('_', ' ').lower().split(' ')
 
+        if command[0] == '/restart' and str(from_id) in config.ADMIN:
+            bot.sendMessage(chat_id, "即將更新並重新啟動")
+            print("Restarting...")
+            time.sleep(1)
+            os._exit(0)
+
         # first-time user
-        if user.status == '第一次用':
+        elif user.status == '第一次用':
             if chat_type == 'private':
                 user.new_user()
             elif msg['text'].startswith('/'):
@@ -66,13 +72,6 @@ def on_chat(msg):
                     user.display_question(command[1], chat_id)
                 else:
                     user.display_questions(chat_id)
-
-        elif command[0] == '/restart':
-            if str(from_id) in config.ADMIN:
-                bot.sendMessage(chat_id, "即將更新並重新啟動")
-                print("Restarting...")
-                time.sleep(1)
-                os._exit(0)
 
         elif command[0] == '/ping':
             bot.sendMessage(chat_id, "*PONG*",
