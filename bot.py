@@ -32,21 +32,21 @@ def on_chat(msg):
     if content_type == 'text':
         # pre-treat the command
         command = [msg['text']]
-        if msg['text'][0] == '/':
+        if msg['text'].startswith('/'):
             command = msg['text'].replace(config.NAME, '').replace('_', ' ').lower().split(' ')
 
         # first-time user
         if user.status == '第一次用':
             if chat_type == 'private':
                 user.new_user()
-            else:
+            elif msg['text'].startswith('/'):
                 bot.sendMessage(chat_id, "請先私訊我登入 kCOJ", reply_to_message_id=msg['message_id'])
 
         # press password
         elif user.status == '輸入學號':
             if chat_type == 'private':
                 user.press_password(msg['text'])
-            else:
+            elif msg['text'].startswith('/'):
                 bot.sendMessage(chat_id, "請先私訊我登入 kCOJ", reply_to_message_id=msg['message_id'])
 
         # login
@@ -145,13 +145,9 @@ with open('users.json', 'r') as f:
 
 MessageLoop(bot, on_chat).run_as_thread()
 print("Started! Service is available.")
-count = 0
+
 while True:
     time.sleep(1)
-    count += 1
-    if count == 5:
-        bot.getMe()
-        count = 0
 
     # backup
     users_backup = {}
