@@ -45,22 +45,16 @@ def on_chat(msg):
         elif user.status == '第一次用':
             if chat_type == 'private':
                 user.new_user()
-            elif msg['text'].startswith('/'):
-                bot.sendMessage(chat_id, "請先私訊我登入 kCOJ", reply_to_message_id=msg['message_id'])
 
         # press password
         elif user.status == '輸入學號':
             if chat_type == 'private':
                 user.press_password(msg['text'])
-            elif msg['text'].startswith('/'):
-                bot.sendMessage(chat_id, "請先私訊我登入 kCOJ", reply_to_message_id=msg['message_id'])
 
         # login
         elif user.status == '輸入密碼':
             if chat_type == 'private':
                 user.login_kcoj(msg['text'])
-            else:
-                bot.sendMessage(chat_id, "請先私訊我登入 kCOJ", reply_to_message_id=msg['message_id'])
 
         elif command[0] == '/start' or command[0] == '首頁🏠':
             if user.check_online(chat_id, msg['message_id']) == True:
