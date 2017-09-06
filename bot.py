@@ -138,14 +138,12 @@ with open('users.json', 'r') as f:
 
 MessageLoop(bot, on_chat).run_as_thread()
 print("Started! Service is available.")
-count = 0
-while True:
-    time.sleep(1)
-    count += 1
-    if count == 5:
-        bot.getMe()
-        count = 0
 
+while True:
+    time.sleep(60)
+
+    # keep alive
+    bot.getMe()
     # backup
     users_backup = {}
     for key in users.keys():
