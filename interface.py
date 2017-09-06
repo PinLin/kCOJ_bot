@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # necessary modules
-import os, requests, telepot
+import os, telepot
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from random import choice
 # kCOJ API
