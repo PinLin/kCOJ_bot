@@ -14,7 +14,7 @@ users = {}
 
 def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
-    from_id = msg['from']['id'] 
+    from_id = msg['from']['id']
     pprint(msg)
     print('content_type:', content_type)
     print('chat_type:', chat_type)
@@ -35,6 +35,7 @@ def on_chat(msg):
         if msg['text'].startswith('/'):
             command = msg['text'].replace(config.NAME, '').replace('_', ' ').lower().split(' ')
 
+        # restart this bot
         if command[0] == '/restart' and str(from_id) in config.ADMIN:
             bot.sendMessage(chat_id, "即將更新並重新啟動")
             print("Restarting...")
@@ -56,6 +57,7 @@ def on_chat(msg):
             if chat_type == 'private':
                 user.login_kcoj(msg['text'])
 
+        # homepage
         elif command[0] == '/start' or command[0] == '首頁🏠':
             if user.check_online(chat_id, msg['message_id']) == True:
                 user.display_main(chat_id)
@@ -136,6 +138,7 @@ with open('users.json', 'r') as f:
         user = users_restore[key]
         users[key] = kuser(user['userid'], user['username'], user['password'], user['status'], user['question'])
 
+# start this bot
 MessageLoop(bot, on_chat).run_as_thread()
 print("Started! Service is available.")
 
@@ -144,6 +147,7 @@ while True:
 
     # keep alive
     bot.getMe()
+
     # backup
     users_backup = {}
     for key in users.keys():
