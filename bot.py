@@ -42,6 +42,17 @@ def on_chat(msg):
             time.sleep(1)
             os._exit(0)
 
+        # test connection
+        elif command[0] == '/ping':
+            bot.sendMessage(chat_id, "*PONG*",
+            parse_mode='Markdown',
+            reply_to_message_id=msg['message_id'])
+
+        # help message
+        elif command[0] == '/help' or command[0] == '幫助📚':
+            if chat_type == 'private':
+                user.help_you()
+
         # first-time user
         elif user.status == '第一次用':
             if chat_type == 'private':
@@ -69,16 +80,8 @@ def on_chat(msg):
                 else:
                     user.display_questions(chat_id)
 
-        elif command[0] == '/ping':
-            bot.sendMessage(chat_id, "*PONG*",
-            parse_mode='Markdown',
-            reply_to_message_id=msg['message_id'])
-
         elif chat_type == 'private':
-            if command[0] == '/help' or command[0] == '幫助📚':
-                user.help_you()
-
-            elif command[0] == '/password' or command[0] == '改密碼💱':
+            if command[0] == '/password' or command[0] == '改密碼💱':
                 if user.check_online(chat_id, msg['message_id']) == True:
                     user.press_oldpassword()
 
