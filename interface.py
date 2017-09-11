@@ -195,13 +195,11 @@ class kuser:
                                      "7. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利\n\n"
                                      "本專案授權方式採用 GPLv3\n"
                                      "非常歡迎發 issue 送 PR owooo\n"
+                                     "聯絡我請私訊 @PinLin\n"
                                      "原始碼被託管於 GitHub，如果想要鼓勵我的話可以幫我按個星星> </\n"
                                      "網址如下：\n"
                                      "[https://github.com/PinLin/kcoj_bot]\n\n",
-                                     parse_mode='Markdown',
-                                     reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                         ["首頁🏠"]
-                                     ], resize_keyboard=True) if not self.status == '第一次用' else ReplyKeyboardRemove())
+                                     parse_mode='Markdown')
 
     def upload_answer(self):
         self.status = '上傳答案'
