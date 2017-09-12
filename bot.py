@@ -39,6 +39,7 @@ def on_chat(msg):
         if command[0] == '/restart' and str(from_id) in config.ADMIN:
             bot.sendMessage(chat_id, "即將更新並重新啟動")
             print("Restarting...")
+            backup_db()
             time.sleep(1)
             os._exit(0)
 
@@ -134,24 +135,7 @@ def on_chat(msg):
                 else:
                     user.send_answer('', msg['document']['file_id'])
 
-# restore
-with open('users.json', 'r') as f:
-    users_restore = json.load(f)
-    for key in users_restore.keys():
-        user = users_restore[key]
-        users[key] = kuser(user['userid'], user['username'], user['password'], user['status'], user['question'])
-
-# start this bot
-MessageLoop(bot, on_chat).run_as_thread()
-print("Started! Service is available.")
-
-while True:
-    time.sleep(60)
-
-    # keep alive
-    bot.getMe()
-
-    # backup
+def backup_db():
     users_backup = {}
     for key in users.keys():
         user = users[key]
@@ -164,3 +148,26 @@ while True:
         }
     with open('users.json', 'w') as f:
         json.dump(users_backup, f, indent='    ')
+
+def restore_db():
+    with open('users.json', 'r') as f:
+        users_restore = json.load(f)
+        for key in users_restore.keys():
+            user = users_restore[key]
+            users[key] = kuser(user['userid'], user['username'], user['password'], user['status'], user['question'])
+
+# restore
+restore_db()
+
+# start this bot
+MessageLoop(bot, on_chat).run_as_thread()
+print("Started! Service is available.")
+
+while True:
+    time.sleep(60)
+
+    # keep alive
+    bot.getMe()
+
+    # backup
+    backup_db()
