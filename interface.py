@@ -7,7 +7,7 @@ from random import choice
 # kCOJ API
 import access
 # configurations
-import config, promote
+import config, promote, external
 
 bot = telepot.Bot(config.TOKEN)
 
@@ -162,21 +162,27 @@ class kuser:
     def display_question(self, number, chat_id):
         self.status = '查看題目'
         self.question = number
-        content = self.api.show_question(number)
+        if number in external.QUESTION:
+            ext_q = True
+            content = external.QUESTION[number]
+        else:
+            ext_q = False
+            content = '```\n' + self.api.show_question(number) + '\n```'
         q = self.api.list_questions()[number]
         q_str = "💁 *" + self.username + "* [" + config.NAME + "]\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
         q_str += "*" + number + "* (DL: " + q[0] + ")\n [[[" + q[2] + "]]]"
         q_str += "⚠️" if q[2] == '未繳' else "✅"
-        reply = bot.sendMessage(chat_id, q_str + "\n\n```\n" + content + "\n```",
+        reply = bot.sendMessage(chat_id, q_str + "\n\n" + content,
             parse_mode='Markdown',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "題庫📝"],
                 ["交作業📮" if q[1] == '期限未到' else '', "看結果☑️" if q[2] == '已繳' else '', "通過者🌐"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove())
-        bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=reply['message_id'])
+        if ext_q == False:
+            bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=reply['message_id'])
 
     def help_you(self):
         self.question = '題外'
