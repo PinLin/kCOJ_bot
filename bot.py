@@ -147,7 +147,7 @@ def backup_db():
             'question': user.question
         }
     with open('users.json', 'w') as f:
-        json.dump(users_backup, f, indent='    ')
+        json.dump(users_backup, f, indent='  ')
 
 def restore_db():
     with open('users.json', 'r') as f:
