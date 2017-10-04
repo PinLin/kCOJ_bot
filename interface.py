@@ -136,7 +136,8 @@ class kuser:
                                  reply_markup=ReplyKeyboardMarkup(keyboard=[
                                      ["題庫📝"],
                                      ["登出🚪", "改密碼💱", "幫助📚"]
-                                 ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove())
+                                 ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove(),
+                                 disable_web_page_preview=True)
 
     def display_questions(self, chat_id):
         self.status = '正常使用'
@@ -156,7 +157,8 @@ class kuser:
                                          reply_markup=ReplyKeyboardMarkup(keyboard=[
                                              ["首頁🏠", "更新🔃"],
                                              ["登出🚪", "改密碼💱", "幫助📚"]
-                                         ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove())
+                                         ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove(),
+                                         disable_web_page_preview=True)
         bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
 
     def display_question(self, number, chat_id):
