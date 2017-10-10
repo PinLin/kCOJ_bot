@@ -190,7 +190,6 @@ class Kuser:
             bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=reply['message_id'])
 
     def help_you(self):
-        self._question = '題外'
         bot.sendMessage(self._userid, "這裡是 kC Online Judge Bot！\n"
                                      "可以簡稱 kCOJ Bot，目前定居於 [" + config.NAME + "]\n"
                                      "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
