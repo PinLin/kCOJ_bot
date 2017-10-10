@@ -1,12 +1,16 @@
 #! /usr/bin/env python3
 
 # necessary modules
-import os, time, json, requests, telepot
+import os
+import time
+import json
+import requests
+import telepot
 from telepot.loop import MessageLoop
 from pprint import pprint
 # kCOJ API
 import access
-from interface import kuser, bot
+from interface import Kuser, bot
 # configurations
 import config
 
@@ -23,7 +27,7 @@ def on_chat(msg):
     print()
 
     # create a user object
-    user = kuser(from_id)
+    user = Kuser(from_id)
     if str(from_id) in users:
         user = users[str(from_id)]
     else:
@@ -55,17 +59,17 @@ def on_chat(msg):
                 user.help_you()
 
         # first-time user
-        elif user.status == '第一次用':
+        elif user._status == '第一次用':
             if chat_type == 'private':
                 user.new_user()
 
         # press password
-        elif user.status == '輸入學號':
+        elif user._status == '輸入學號':
             if chat_type == 'private':
                 user.press_password(msg['text'])
 
         # login
-        elif user.status == '輸入密碼':
+        elif user._status == '輸入密碼':
             if chat_type == 'private':
                 user.login_kcoj(msg['text'])
 
@@ -87,39 +91,39 @@ def on_chat(msg):
                     user.press_oldpassword()
 
             elif command[0] == '/logout' or command[0] == '登出🚪':
-                user = kuser(from_id)
+                user = Kuser(from_id)
                 users[str(from_id)] = user
                 user.logout_system()
 
-            elif (command[0] == '/delete' or command[0] == '刪除作業⚔️') and user.question != '題外':
+            elif (command[0] == '/delete' or command[0] == '刪除作業⚔️') and user._question != '題外':
                 if user.check_online(chat_id, msg['message_id']) == True:
                     user.delete_answer()
 
-            elif (command[0] == '/upload' or command[0] == '交作業📮') and user.question != '題外':
+            elif (command[0] == '/upload' or command[0] == '交作業📮') and user._question != '題外':
                 if user.check_online(chat_id, msg['message_id']) == True:
                     user.upload_answer()
 
-            elif (command[0] == '/result' or command[0] == '看結果☑️') and user.question != '題外':
+            elif (command[0] == '/result' or command[0] == '看結果☑️') and user._question != '題外':
                 if user.check_online(chat_id, msg['message_id']) == True:
                     user.list_results()
 
-            elif (command[0] == '/passer' or command[0] == '通過者🌐') and user.question != '題外':
+            elif (command[0] == '/passer' or command[0] == '通過者🌐') and user._question != '題外':
                 if user.check_online(chat_id, msg['message_id']) == True:
                     user.list_passers()
 
-            elif command[0] == '回題目📜' and user.question != '題外':
+            elif command[0] == '回題目📜' and user._question != '題外':
                 if user.check_online(chat_id, msg['message_id']) == True:
-                    user.display_question(user.question, chat_id)
+                    user.display_question(user._question, chat_id)
 
-            elif user.status == '舊的密碼':
+            elif user._status == '舊的密碼':
                 if user.check_online(chat_id, msg['message_id']) == True:
                     user.press_newpassword(msg['text'])
 
-            elif user.status == '修改密碼':
+            elif user._status == '修改密碼':
                 if user.check_online(chat_id, msg['message_id']) == True:
                     user.change_password(msg['text'])
 
-            elif user.status == '上傳答案':
+            elif user._status == '上傳答案':
                 if user.check_online(chat_id, msg['message_id']) == True:
                     user.send_answer(msg['text'], '')
 
@@ -128,7 +132,7 @@ def on_chat(msg):
                     bot.sendMessage(chat_id, "(ˊ・ω・ˋ)")
             
     elif content_type == 'document':
-        if user.status == '上傳答案' or user.status == '查看題目':
+        if user._status == '上傳答案' or user._status == '查看題目':
             if user.check_online(chat_id, msg['message_id']) == True:
                 if msg['document']['file_size'] > 167770000:
                     user.fail_send()
@@ -140,11 +144,11 @@ def backup_db():
     for key in users.keys():
         user = users[key]
         users_backup[key] = {
-            'userid': user.userid,
-            'username': user.username,
-            'password': user.password,
-            'status': user.status,
-            'question': user.question
+            'userid': user._userid,
+            'username': user._username,
+            'password': user._password,
+            'status': user._status,
+            'question': user._question
         }
     with open('users.json', 'w') as f:
         json.dump(users_backup, f, indent='  ')
@@ -154,7 +158,7 @@ def restore_db():
         users_restore = json.load(f)
         for key in users_restore.keys():
             user = users_restore[key]
-            users[key] = kuser(user['userid'], user['username'], user['password'], user['status'], user['question'])
+            users[key] = Kuser(user['userid'], user['username'], user['password'], user['status'], user['question'])
 
 # restore
 restore_db()

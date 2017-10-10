@@ -1,111 +1,114 @@
 #! /usr/bin/env python3
 
 # necessary modules
-import os, telepot
+import os
+import telepot
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from random import choice
 # kCOJ API
 import access
 # configurations
-import config, promote, external
+import config
+import promote
+import external
 
 bot = telepot.Bot(config.TOKEN)
 
-class kuser:
-    def __init__(self, uid, un='', pw='', st='第一次用', qu='題外'):
-        self.userid = uid
-        self.username = un
-        self.password = pw
-        self.status = st
-        self.question = qu
-        self.api = access.kuser_api()
+class Kuser:
+    def __init__(self, userid, username='', password='', status='第一次用', question='題外'):
+        self._userid = userid
+        self._username = username
+        self._password = password
+        self._status = status
+        self._question = question
+        self._api = access.KuserAPI()
 
     def new_user(self):
         self.help_you()
         self.press_username()
     
     def press_username(self):
-        self.status = '輸入學號'
-        self.question = '題外'
-        bot.sendMessage(self.userid, "請輸入您的學號：", reply_markup=ReplyKeyboardRemove())
+        self._status = '輸入學號'
+        self._question = '題外'
+        bot.sendMessage(self._userid, "請輸入您的學號：", reply_markup=ReplyKeyboardRemove())
 
     def press_password(self, text):
-        self.status = '輸入密碼'
-        self.question = '題外'
-        self.username = text
-        bot.sendMessage(self.userid, "輸入完可刪除訊息以策安全！\n"
+        self._status = '輸入密碼'
+        self._question = '題外'
+        self._username = text
+        bot.sendMessage(self._userid, "輸入完可刪除訊息以策安全！\n"
                                      "請輸入您的密碼：", reply_markup=ReplyKeyboardRemove())
 
     def press_oldpassword(self):
-        self.status = '舊的密碼'
-        self.question = '題外'
-        bot.sendMessage(self.userid, "請輸入要原本的舊密碼：",
+        self._status = '舊的密碼'
+        self._question = '題外'
+        bot.sendMessage(self._userid, "請輸入要原本的舊密碼：",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠"]
             ], resize_keyboard=True))
 
     def press_newpassword(self, text):
-        if text != self.password:
-            self.status = '正常使用'
-            self.question = '題外'
-            bot.sendMessage(self.userid, "密碼錯誤！",
+        if text != self._password:
+            self._status = '正常使用'
+            self._question = '題外'
+            bot.sendMessage(self._userid, "密碼錯誤！",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠"]
                 ], resize_keyboard=True))
         else:
-            self.status = '修改密碼'
-            self.question = '題外'
-            bot.sendMessage(self.userid, "使用此功能請務必小心！\n"
+            self._status = '修改密碼'
+            self._question = '題外'
+            bot.sendMessage(self._userid, "使用此功能請務必小心！\n"
                                          "請輸入要設定的新密碼：",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠"]
                 ], resize_keyboard=True))
         
     def change_password(self, text):
-        self.status = '正常使用'
-        self.question = '題外'
-        self.password = text
-        bot.sendMessage(self.userid, "修改成功！" if self.api.change_password(self.password) == True else "修改失敗。",
+        self._status = '正常使用'
+        self._question = '題外'
+        self._password = text
+        bot.sendMessage(self._userid, "修改成功！" if self._api.change_password(self._password) == True else "修改失敗。",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠"]
             ], resize_keyboard=True))
 
     def login_kcoj(self, text):
-        self.status = '正常使用'
-        self.question = '題外'
-        self.password = text
-        bot.sendMessage(self.userid, "登入中...", reply_markup=ReplyKeyboardRemove())
-        if self.check_online(self.userid) == True:
-            self.display_main(self.userid)
+        self._status = '正常使用'
+        self._question = '題外'
+        self._password = text
+        bot.sendMessage(self._userid, "登入中...", reply_markup=ReplyKeyboardRemove())
+        if self.check_online(self._userid) == True:
+            self.display_main(self._userid)
 
     def fail_login(self, chat_id, message_id):
-        self.status = '正常使用'
-        self.question = '題外'
-        if chat_id != self.userid:
+        self._status = '正常使用'
+        self._question = '題外'
+        if chat_id != self._userid:
             bot.sendMessage(chat_id, "登入失敗，請先私訊我重新登入 kCOJ", reply_to_message_id=message_id)
-        bot.sendMessage(self.userid, "哇...登入失敗，讓我們重新開始", reply_markup=ReplyKeyboardRemove())
+        bot.sendMessage(self._userid, "哇...登入失敗，讓我們重新開始", reply_markup=ReplyKeyboardRemove())
         self.press_username()
         
     def fail_connecting(self, chat_id, message_id):
-        self.status = '正常使用'
-        self.question = '題外'
-        if chat_id != self.userid:
+        self._status = '正常使用'
+        self._question = '題外'
+        if chat_id != self._userid:
             bot.sendMessage(chat_id, "kCOJ 離線中！請稍後再試", reply_to_message_id=message_id)
         else:
-            bot.sendMessage(self.userid, "kCOJ 離線中！請稍後再試",
+            bot.sendMessage(self._userid, "kCOJ 離線中！請稍後再試",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "幫助📚"]
                 ], resize_keyboard=True))
 
     def check_online(self, chat_id, message_id=''):
-        result = self.api.check_online()
+        result = self._api.check_online()
         if result == None:
             self.fail_connecting(chat_id, message_id)
             return False
         else:
             if result == False:
-                self.api.login_kcoj(self.username, self.password)
-                result = self.api.check_online()
+                self._api.login_kcoj(self._username, self._password)
+                result = self._api.check_online()
             if result == False:
                 self.fail_login(chat_id, message_id)
             elif result == None:
@@ -113,22 +116,22 @@ class kuser:
             return result == True
 
     def logout_system(self):
-        self.status = '正常使用'
-        self.question = '題外'
-        bot.sendMessage(self.userid, "您現在已經是登出的狀態。", reply_markup=ReplyKeyboardRemove())
+        self._status = '正常使用'
+        self._question = '題外'
+        bot.sendMessage(self._userid, "您現在已經是登出的狀態。", reply_markup=ReplyKeyboardRemove())
         self.press_username()
 
     def display_main(self, chat_id):
-        self.status = '正常使用'
-        self.question = '題外'
-        q_dict = self.api.list_questions()
+        self._status = '正常使用'
+        self._question = '題外'
+        q_dict = self._api.list_questions()
         q_str = ''
         for key in q_dict.keys():
             if q_dict[key][1] == '期限未到':
                 q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
                 q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
                 q_str += "  /question_" + key + "\n\n"
-        bot.sendMessage(chat_id, "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+        bot.sendMessage(chat_id, "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
                                  "➖➖➖➖➖\n"
                                  "📝<i>可繳交的作業</i>\n\n" + q_str + \
                                  "➖➖➖➖➖\n" + choice(promote.sentences),
@@ -136,20 +139,20 @@ class kuser:
                                  reply_markup=ReplyKeyboardMarkup(keyboard=[
                                      ["題庫📝"],
                                      ["登出🚪", "改密碼💱", "幫助📚"]
-                                 ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove(),
+                                 ], resize_keyboard=True) if chat_id == self._userid else ReplyKeyboardRemove(),
                                  disable_web_page_preview=True)
 
     def display_questions(self, chat_id):
-        self.status = '正常使用'
-        self.question = '題外'
-        q_dict = self.api.list_questions()
+        self._status = '正常使用'
+        self._question = '題外'
+        q_dict = self._api.list_questions()
         q_str = ''
         for key in q_dict.keys():
             q_str += "📗" if q_dict[key][1] == '期限未到' else "📕"
             q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
             q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
             q_str += "  /question_" + key + "\n\n"
-        reply = bot.sendMessage(chat_id, "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+        reply = bot.sendMessage(chat_id, "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
                                          "➖➖➖➖➖\n"
                                          "📝<i>所有作業</i>\n\n" + q_str + \
                                          "➖➖➖➖➖\n" + choice(promote.sentences),
@@ -157,21 +160,21 @@ class kuser:
                                          reply_markup=ReplyKeyboardMarkup(keyboard=[
                                              ["首頁🏠", "更新🔃"],
                                              ["登出🚪", "改密碼💱", "幫助📚"]
-                                         ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove(),
+                                         ], resize_keyboard=True) if chat_id == self._userid else ReplyKeyboardRemove(),
                                          disable_web_page_preview=True)
         bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
 
     def display_question(self, number, chat_id):
-        self.status = '查看題目'
-        self.question = number
+        self._status = '查看題目'
+        self._question = number
         if number in external.QUESTION:
             ext_q = True
             content = external.QUESTION[number]
         else:
             ext_q = False
-            content = '```\n' + self.api.show_question(number) + '\n```'
-        q = self.api.list_questions()[number]
-        q_str = "💁 *" + self.username + "* [" + config.NAME + "]\n"
+            content = '```\n' + self._api.show_question(number) + '\n```'
+        q = self._api.list_questions()[number]
+        q_str = "💁 *" + self._username + "* [" + config.NAME + "]\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
         q_str += "*" + number + "* (DL: " + q[0] + ")\n [[[" + q[2] + "]]]"
@@ -182,13 +185,13 @@ class kuser:
                 ["首頁🏠", "題庫📝"],
                 ["交作業📮" if q[1] == '期限未到' else '', "看結果☑️" if q[2] == '已繳' else '', "通過者🌐"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
-            ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove())
+            ], resize_keyboard=True) if chat_id == self._userid else ReplyKeyboardRemove())
         if ext_q == False:
             bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=reply['message_id'])
 
     def help_you(self):
-        self.question = '題外'
-        bot.sendMessage(self.userid, "這裡是 kC Online Judge Bot！\n"
+        self._question = '題外'
+        bot.sendMessage(self._userid, "這裡是 kC Online Judge Bot！\n"
                                      "可以簡稱 kCOJ Bot，目前定居於 [" + config.NAME + "]\n"
                                      "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
                                      "➡️[傳送門](" + config.URL + ")\n"
@@ -209,89 +212,89 @@ class kuser:
                                      parse_mode='Markdown')
 
     def upload_answer(self):
-        self.status = '上傳答案'
-        q = self.api.list_questions()[self.question]
-        q_str = "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+        self._status = '上傳答案'
+        q = self._api.list_questions()[self._question]
+        q_str = "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
+        q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
         q_str += "⚠️" if q[2] == '未繳' else "✅"
-        bot.sendMessage(self.userid, q_str + "\n\n現在請把你的程式碼讓我看看（請別超過 20 MB）\n"
+        bot.sendMessage(self._userid, q_str + "\n\n現在請把你的程式碼讓我看看（請別超過 20 MB）\n"
                                              "可以使用「文字訊息」或是「傳送檔案」的方式", parse_mode='HTML',
                                              reply_markup=ReplyKeyboardMarkup(keyboard=[
-                                                 ["刪除作業⚔️"] if self.api.list_questions()[self.question][2] == '已繳' else [],
+                                                 ["刪除作業⚔️"] if self._api.list_questions()[self._question][2] == '已繳' else [],
                                                  ["首頁🏠", "回題目📜"]
                                              ], resize_keyboard=True))
 
     def send_answer(self, text, file_id):
-        self.status = '正常使用'
+        self._status = '正常使用'
         if text != '':
-            with open(self.username + self.question + '.c', 'w') as f:
+            with open(self._username + self._question + '.c', 'w') as f:
                 f.write(text)
         else:
-            bot.download_file(file_id, self.username + self.question + '.c')
-        self.api.delete_answer(self.question)
-        if self.api.upload_answer(self.question, self.username + self.question + '.c') == True:
-            bot.sendMessage(self.userid, "上傳成功",
+            bot.download_file(file_id, self._username + self._question + '.c')
+        self._api.delete_answer(self._question)
+        if self._api.upload_answer(self._question, self._username + self._question + '.c') == True:
+            bot.sendMessage(self._userid, "上傳成功",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "回題目📜"],
                     ["看結果☑️"],
                     ["登出🚪", "改密碼💱", "幫助📚"]
                 ], resize_keyboard=True))
         else:
-            bot.sendMessage(self.userid, "上傳失敗",
+            bot.sendMessage(self._userid, "上傳失敗",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "回題目📜"],
                     ["登出🚪", "改密碼💱", "幫助📚"]
                 ], resize_keyboard=True))
-        os.remove(self.username + self.question + '.c')    
+        os.remove(self._username + self._question + '.c')    
     
     def delete_answer(self):
-        bot.sendMessage(self.userid, "移除成功" if self.api.delete_answer(self.question) == True else "移除失敗",
+        bot.sendMessage(self._userid, "移除成功" if self._api.delete_answer(self._question) == True else "移除失敗",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
 
     def fail_send(self):
-        self.status = '正常使用'
-        bot.sendMessage(self.userid, "檔案不能超過 20 MB！上傳失敗",
+        self._status = '正常使用'
+        bot.sendMessage(self._userid, "檔案不能超過 20 MB！上傳失敗",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
 
     def list_passers(self):
-        self.status = '正常使用'
-        q = self.api.list_questions()[self.question]
-        q_str = "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+        self._status = '正常使用'
+        q = self._api.list_questions()[self._question]
+        q_str = "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
+        q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
         q_str += "⚠️" if q[2] == '未繳' else "✅"
         q_str += "<code>\n"
-        for passer in self.api.list_passers(self.question):
+        for passer in self._api.list_passers(self._question):
             q_str += "\n" + passer
-        reply = bot.sendMessage(self.userid, q_str + "</code>", 
+        reply = bot.sendMessage(self._userid, q_str + "</code>", 
             parse_mode='HTML',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
-        bot.sendMessage(self.userid, "點我到名單頂", reply_to_message_id=reply['message_id'])
+        bot.sendMessage(self._userid, "點我到名單頂", reply_to_message_id=reply['message_id'])
 
     def list_results(self):
-        self.status = '正常使用'
-        q = self.api.list_questions()[self.question]
-        q_str = "💁 <b>" + self.username + "</b> " + config.NAME + "\n"
+        self._status = '正常使用'
+        q = self._api.list_questions()[self._question]
+        q_str = "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n"
-        for result in self.api.list_results(self.question, self.username):
+        q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n"
+        for result in self._api.list_results(self._question, self._username):
             q_str += "\n測試編號 <code>" + result[0] + "</code>："
             q_str += "✔️ " if result[1] == '通過測試' else "❌ "
             q_str += result[1]
-        bot.sendMessage(self.userid, q_str, 
+        bot.sendMessage(self._userid, q_str, 
             parse_mode='HTML', 
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],

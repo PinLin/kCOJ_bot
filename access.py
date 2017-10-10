@@ -3,27 +3,26 @@
 # necessary modules
 import requests
 from bs4 import BeautifulSoup
-from pprint import pprint
 # configurations
 import config
 
-class kuser_api:
+class KuserAPI:
     def __init__(self):
-        self.session = requests.Session()
+        self._session = requests.Session()
     # login kCOJ
     def login_kcoj(self, username, password):
         try:
             payload = {'name': username, 
                        'passwd': password,
                        'rdoCourse': 1}
-            return self.session.post(config.URL + '/Login', data=payload, timeout=0.5)
+            return self._session.post(config.URL + '/Login', data=payload, timeout=0.5)
         except requests.exceptions.Timeout:
             return None
 
     # check online status
     def check_online(self):
         try:
-            response = self.session.get(config.URL + '/TopMenu', timeout=0.5)
+            response = self._session.get(config.URL + '/TopMenu', timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             return soup.find('a').get_text().strip() == '線上考試'
         except requests.exceptions.Timeout:
@@ -33,7 +32,7 @@ class kuser_api:
     def list_questions(self):
         try:
             questions = {}
-            response = self.session.get(config.URL + '/HomeworkBoard', timeout=0.5)
+            response = self._session.get(config.URL + '/HomeworkBoard', timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             for tag in soup.find_all('tr'):
                 if tag.find('a') == None:
@@ -51,7 +50,7 @@ class kuser_api:
     # show the content of the question
     def show_question(self, number):
         try:
-            response = self.session.get(config.URL + '/showHomework', params={'hwId': number}, timeout=0.5)
+            response = self._session.get(config.URL + '/showHomework', params={'hwId': number}, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             raw = soup.find('body').get_text().replace('繳交作業', '').strip()
             content = ''
@@ -65,7 +64,7 @@ class kuser_api:
     def list_passers(self, number):
         try:
             passers = []
-            response = self.session.get(config.URL + '/success.jsp', params={'HW_ID': number}, timeout=0.5)
+            response = self._session.get(config.URL + '/success.jsp', params={'HW_ID': number}, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             for tr in soup.find_all('tr'):
                 passer = tr.get_text().replace('\n', '').strip()
@@ -79,7 +78,7 @@ class kuser_api:
     def list_results(self, number, username):
         try:
             results = []
-            response = self.session.get(config.URL + '/CheckResult.jsp', params={'questionID': number, 'studentID': username}, timeout=0.5)
+            response = self._session.get(config.URL + '/CheckResult.jsp', params={'questionID': number, 'studentID': username}, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             for tr in soup.find_all('tr'):
                 td = tr.find('td')
@@ -94,7 +93,7 @@ class kuser_api:
         try:
             payload = {'pass': password, 
                        'submit': 'sumit'}
-            response = self.session.post(config.URL + '/changePasswd', data=payload, timeout=0.5)
+            response = self._session.post(config.URL + '/changePasswd', data=payload, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             return str(soup.find('body')).split()[-2].strip() == 'Success'
         except requests.exceptions.Timeout:
@@ -103,7 +102,7 @@ class kuser_api:
     # delete the answer of the question
     def delete_answer(self, number):
         try:
-            response = self.session.get(config.URL + '/delHw', params={'title': number}, timeout=0.5)
+            response = self._session.get(config.URL + '/delHw', params={'title': number}, timeout=0.5)
             soup = BeautifulSoup(response.text, 'html.parser')
             return soup.find('body').get_text().replace('\n', '').strip() == 'delete success'
         except requests.exceptions.Timeout:
@@ -112,8 +111,8 @@ class kuser_api:
     # hand in a answer
     def upload_answer(self, number, file_path):
         try:
-            self.session.get(config.URL + '/upLoadHw', params={'hwId': number}, timeout=0.5)
-            response = self.session.post(config.URL + '/upLoadFile', 
+            self._session.get(config.URL + '/upLoadHw', params={'hwId': number}, timeout=0.5)
+            response = self._session.post(config.URL + '/upLoadFile', 
                 data={'FileDesc': 'Send from kcoj_bot'},
                 files={'hwFile': open(file_path, 'rb')},
                 timeout=0.5)
