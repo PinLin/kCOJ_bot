@@ -33,6 +33,12 @@ def on_chat(msg):
     else:
         users[str(from_id)] = user
 
+    # just want to know
+    try:
+        print('student_id:', user._username)
+    except:
+        pass
+
     if content_type == 'text':
         # pre-treat the command
         command = [msg['text']]
