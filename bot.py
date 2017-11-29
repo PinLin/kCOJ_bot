@@ -1,25 +1,23 @@
 #! /usr/bin/env python3
 
-# necessary modules
+# modules
 import os
 import time
 import json
-import requests
+from pprint import pprint
 import telepot
 from telepot.loop import MessageLoop
-from pprint import pprint
-# kCOJ API
-import access
-from interface import Kuser, bot
-# configurations
-import config
+# config
+from config import NAME, TOKEN, ADMIN
+from interface import Kuser
 
+bot = telepot.Bot(TOKEN)
 users = {}
 
 def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     from_id = msg['from']['id']
-    
+
     # debug message
     pprint(msg)
     print('content_type:', content_type)
@@ -42,10 +40,10 @@ def on_chat(msg):
         # pre-treat the command
         command = [msg['text']]
         if msg['text'].startswith('/'):
-            command = msg['text'].replace(config.NAME, '').replace('_', ' ').lower().split(' ')
+            command = msg['text'].replace(NAME, '').replace('_', ' ').lower().split(' ')
 
         # restart this bot
-        if command[0] == '/restart' and str(from_id) in config.ADMIN:
+        if command[0] == '/restart' and str(from_id) in ADMIN:
             bot.sendMessage(chat_id, "即將更新並重新啟動")
             print("Restarting...")
             backup_db()
@@ -61,7 +59,7 @@ def on_chat(msg):
         # help message
         elif command[0] == '/help' or command[0] == '幫助📚':
             if chat_type == 'private':
-                user.help_you()
+                user.help()
 
         # first-time user
         elif user._status == '第一次用':
@@ -76,19 +74,19 @@ def on_chat(msg):
         # login
         elif user._status == '輸入密碼':
             if chat_type == 'private':
-                user.login_kcoj(msg['text'])
+                user.login(msg['text'])
 
         # homepage
         elif command[0] == '/start' or command[0] == '首頁🏠':
             if user.check_online(chat_id, msg['message_id']) == True:
-                user.display_main(chat_id)
+                user.show_homepage(chat_id)
 
         elif command[0] == '/question' or command[0] == '題庫📝' or command[0] == '更新🔃':
             if user.check_online(chat_id, msg['message_id']) == True:
                 if len(command) > 1:
-                    user.display_question(command[1], chat_id)
+                    user.show_question(command[1], chat_id)
                 else:
-                    user.display_questions(chat_id)
+                    user.list_questions(chat_id)
 
         elif chat_type == 'private':
             if command[0] == '/password' or command[0] == '改密碼💱':
@@ -98,7 +96,7 @@ def on_chat(msg):
             elif command[0] == '/logout' or command[0] == '登出🚪':
                 user = Kuser(from_id)
                 users[str(from_id)] = user
-                user.logout_system()
+                user.logout()
 
             elif (command[0] == '/delete' or command[0] == '刪除作業⚔️') and user._question != '題外':
                 if user.check_online(chat_id, msg['message_id']) == True:
@@ -118,7 +116,7 @@ def on_chat(msg):
 
             elif command[0] == '回題目📜' and user._question != '題外':
                 if user.check_online(chat_id, msg['message_id']) == True:
-                    user.display_question(user._question, chat_id)
+                    user.show_question(user._question, chat_id)
 
             elif user._status == '舊的密碼':
                 if user.check_online(chat_id, msg['message_id']) == True:
@@ -140,7 +138,7 @@ def on_chat(msg):
         if user._status == '上傳答案' or user._status == '查看題目':
             if user.check_online(chat_id, msg['message_id']) == True:
                 if msg['document']['file_size'] > 167770000:
-                    user.fail_send()
+                    user.send_failed()
                 else:
                     user.send_answer('', msg['document']['file_id'])
 
@@ -175,7 +173,7 @@ print("Started! Service is available.")
 while True:
     time.sleep(60)
 
-    # keep alive
+    # keep bot alive
     bot.getMe()
 
     # backup

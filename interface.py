@@ -1,18 +1,17 @@
 #! /usr/bin/env python3
 
-# necessary modules
+# modules
 import os
+from random import choice
 import telepot
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
-from random import choice
-# kCOJ API
-import access
-# configurations
-import config
+# config
+from config import NAME, URL, TOKEN
+from kcoj import KCOJ
 import promote
 import external
 
-bot = telepot.Bot(config.TOKEN)
+bot = telepot.Bot(TOKEN)
 
 class Kuser:
     def __init__(self, userid, username='', password='', status='第一次用', question='題外'):
@@ -21,10 +20,10 @@ class Kuser:
         self._password = password
         self._status = status
         self._question = question
-        self._api = access.KuserAPI()
+        self._api = KCOJ(URL)
 
     def new_user(self):
-        self.help_you()
+        self.help()
         self.press_username()
     
     def press_username(self):
@@ -73,29 +72,29 @@ class Kuser:
                 ["首頁🏠"]
             ], resize_keyboard=True))
 
-    def login_kcoj(self, text):
+    def login(self, text):
         self._status = '正常使用'
         self._question = '題外'
         self._password = text
         bot.sendMessage(self._userid, "登入中...", reply_markup=ReplyKeyboardRemove())
         if self.check_online(self._userid) == True:
-            self.display_main(self._userid)
+            self.show_homepage(self._userid)
 
-    def fail_login(self, chat_id, message_id):
+    def login_failed(self, chat_id, message_id):
         self._status = '正常使用'
         self._question = '題外'
         if chat_id != self._userid:
-            bot.sendMessage(chat_id, "登入失敗，請先私訊我重新登入 kCOJ", reply_to_message_id=message_id)
+            bot.sendMessage(chat_id, "登入失敗，請先私訊我重新登入 KCOJ", reply_to_message_id=message_id)
         bot.sendMessage(self._userid, "哇...登入失敗，讓我們重新開始", reply_markup=ReplyKeyboardRemove())
         self.press_username()
         
-    def fail_connecting(self, chat_id, message_id):
+    def connect_failed(self, chat_id, message_id):
         self._status = '正常使用'
         self._question = '題外'
         if chat_id != self._userid:
-            bot.sendMessage(chat_id, "kCOJ 離線中！請稍後再試", reply_to_message_id=message_id)
+            bot.sendMessage(chat_id, "KCOJ 離線中！請稍後再試", reply_to_message_id=message_id)
         else:
-            bot.sendMessage(self._userid, "kCOJ 離線中！請稍後再試",
+            bot.sendMessage(self._userid, "KCOJ 離線中！請稍後再試",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "幫助📚"]
                 ], resize_keyboard=True))
@@ -103,25 +102,25 @@ class Kuser:
     def check_online(self, chat_id, message_id=''):
         result = self._api.check_online()
         if result == None:
-            self.fail_connecting(chat_id, message_id)
+            self.connect_failed(chat_id, message_id)
             return False
         else:
             if result == False:
-                self._api.login_kcoj(self._username, self._password)
+                self._api.login(self._username, self._password)
                 result = self._api.check_online()
             if result == False:
-                self.fail_login(chat_id, message_id)
+                self.login_failed(chat_id, message_id)
             elif result == None:
-                self.fail_connecting(chat_id, message_id)
+                self.connect_failed(chat_id, message_id)
             return result == True
 
-    def logout_system(self):
+    def logout(self):
         self._status = '正常使用'
         self._question = '題外'
         bot.sendMessage(self._userid, "您現在已經是登出的狀態。", reply_markup=ReplyKeyboardRemove())
         self.press_username()
 
-    def display_main(self, chat_id):
+    def show_homepage(self, chat_id):
         self._status = '正常使用'
         self._question = '題外'
         q_dict = self._api.list_questions()
@@ -131,7 +130,7 @@ class Kuser:
                 q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
                 q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
                 q_str += "  /question_" + key + "\n\n"
-        bot.sendMessage(chat_id, "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
+        bot.sendMessage(chat_id, "💁 <b>" + self._username + "</b> " + NAME + "\n"
                                  "➖➖➖➖➖\n"
                                  "📝<i>可繳交的作業</i>\n\n" + q_str + \
                                  "➖➖➖➖➖\n" + choice(promote.sentences),
@@ -142,7 +141,7 @@ class Kuser:
                                  ], resize_keyboard=True) if chat_id == self._userid else ReplyKeyboardRemove(),
                                  disable_web_page_preview=True)
 
-    def display_questions(self, chat_id):
+    def list_questions(self, chat_id):
         self._status = '正常使用'
         self._question = '題外'
         q_dict = self._api.list_questions()
@@ -152,7 +151,7 @@ class Kuser:
             q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
             q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
             q_str += "  /question_" + key + "\n\n"
-        reply = bot.sendMessage(chat_id, "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
+        reply = bot.sendMessage(chat_id, "💁 <b>" + self._username + "</b> " + NAME + "\n"
                                          "➖➖➖➖➖\n"
                                          "📝<i>所有作業</i>\n\n" + q_str + \
                                          "➖➖➖➖➖\n" + choice(promote.sentences),
@@ -164,7 +163,7 @@ class Kuser:
                                          disable_web_page_preview=True)
         bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
 
-    def display_question(self, number, chat_id):
+    def show_question(self, number, chat_id):
         self._status = '查看題目'
         self._question = number
         if number in external.QUESTION:
@@ -174,7 +173,7 @@ class Kuser:
             ext_q = False
             content = '```\n' + self._api.show_question(number) + '\n```'
         q = self._api.list_questions()[number]
-        q_str = "💁 *" + self._username + "* [" + config.NAME + "]\n"
+        q_str = "💁 *" + self._username + "* [" + NAME + "]\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
         q_str += "*" + number + "* (DL: " + q[0] + ")\n [[[" + q[2] + "]]]"
@@ -189,11 +188,11 @@ class Kuser:
         if ext_q == False:
             bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=reply['message_id'])
 
-    def help_you(self):
+    def help(self):
         bot.sendMessage(self._userid, "這裡是 kC Online Judge Bot！\n"
-                                     "可以簡稱 kCOJ Bot，目前定居於 [" + config.NAME + "]\n"
+                                     "可以簡稱 KCOJ Bot，目前定居於 [" + NAME + "]\n"
                                      "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
-                                     "➡️[傳送門](" + config.URL + ")\n"
+                                     "➡️[OJ 傳送門](" + URL + ")\n"
                                      "操作很簡單（？）\n\n"
                                      "還是稍微提幾個需要注意的地方：\n"
                                      "1. 📗代表還可以繳交的作業，📕代表已經不能繳交的作業\n"
@@ -213,7 +212,7 @@ class Kuser:
     def upload_answer(self):
         self._status = '上傳答案'
         q = self._api.list_questions()[self._question]
-        q_str = "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
+        q_str = "💁 <b>" + self._username + "</b> " + NAME + "\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
         q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
@@ -255,7 +254,7 @@ class Kuser:
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
 
-    def fail_send(self):
+    def send_failed(self):
         self._status = '正常使用'
         bot.sendMessage(self._userid, "檔案不能超過 20 MB！上傳失敗",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
@@ -266,7 +265,7 @@ class Kuser:
     def list_passers(self):
         self._status = '正常使用'
         q = self._api.list_questions()[self._question]
-        q_str = "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
+        q_str = "💁 <b>" + self._username + "</b> " + NAME + "\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
         q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
@@ -285,7 +284,7 @@ class Kuser:
     def list_results(self):
         self._status = '正常使用'
         q = self._api.list_questions()[self._question]
-        q_str = "💁 <b>" + self._username + "</b> " + config.NAME + "\n"
+        q_str = "💁 <b>" + self._username + "</b> " + NAME + "\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
         q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n"
