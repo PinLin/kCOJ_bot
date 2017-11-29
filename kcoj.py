@@ -7,7 +7,7 @@ class KCOJ:
         self._url = url
         self._session = requests.Session()
     # login KCOJ
-    def login_kcoj(self, username, password):
+    def login(self, username, password):
         try:
             payload = {'name': username, 
                        'passwd': password,
