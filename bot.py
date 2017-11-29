@@ -19,6 +19,8 @@ users = {}
 def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     from_id = msg['from']['id']
+    
+    # debug message
     pprint(msg)
     print('content_type:', content_type)
     print('chat_type:', chat_type)
@@ -34,10 +36,7 @@ def on_chat(msg):
         users[str(from_id)] = user
 
     # just want to know
-    try:
-        print('student_id:', user._username)
-    except:
-        pass
+    print('student_id:', user._username)
 
     if content_type == 'text':
         # pre-treat the command
