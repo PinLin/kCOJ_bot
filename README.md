@@ -23,4 +23,4 @@ while true; do git pull; python3 bot.py; done
 
 ## License
 
-GPLv3
+MIT License
