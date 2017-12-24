@@ -24,3 +24,7 @@ while true; do git pull; python3 bot.py; done
 ## License
 
 MIT License
+
+## Picture
+
+![](https://github.com/PinLin/kcoj_bot/blob/master/image/image_merge12.png?raw=true)
