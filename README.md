@@ -27,4 +27,4 @@ MIT License
 
 ## Picture
 
-![](https://github.com/PinLin/kcoj_bot/blob/master/image/image_merge12.png?raw=true)
+![](https://github.com/PinLin/kcoj_bot/blob/master/image/image-merge12.png?raw=true)
