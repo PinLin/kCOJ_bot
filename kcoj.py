@@ -7,11 +7,11 @@ class KCOJ:
         self._url = url
         self._session = requests.Session()
     # login KCOJ
-    def login(self, username, password):
+    def login(self, username, password, course):
         try:
             payload = {'name': username, 
                        'passwd': password,
-                       'rdoCourse': 1}
+                       'rdoCourse': course}
             return self._session.post(self._url + '/Login', data=payload, timeout=0.5)
         except requests.exceptions.Timeout:
             return None

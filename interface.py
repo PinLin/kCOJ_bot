@@ -106,7 +106,7 @@ class Kuser:
             return False
         else:
             if result == False:
-                self._api.login(self._username, self._password)
+                self._api.login(self._username, self._password, 2)
                 result = self._api.check_online()
             if result == False:
                 self.login_failed(chat_id, message_id)
