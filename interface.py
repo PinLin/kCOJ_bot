@@ -139,7 +139,7 @@ class Kuser:
                                      ["題庫📝"],
                                      ["登出🚪", "改密碼💱", "幫助📚"]
                                  ], resize_keyboard=True) if chat_id == self._userid else ReplyKeyboardRemove(),
-                                 disable_web_page_preview=True)
+                                 disable_web_page_preview=False)
 
     def list_questions(self, chat_id):
         self._status = '正常使用'
@@ -160,7 +160,7 @@ class Kuser:
                                              ["首頁🏠", "更新🔃"],
                                              ["登出🚪", "改密碼💱", "幫助📚"]
                                          ], resize_keyboard=True) if chat_id == self._userid else ReplyKeyboardRemove(),
-                                         disable_web_page_preview=True)
+                                         disable_web_page_preview=False)
         bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
 
     def show_question(self, number, chat_id):
