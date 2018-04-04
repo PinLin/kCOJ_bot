@@ -38,7 +38,7 @@ class KCOJ:
                     number = tag.find('a').get_text().strip()
                     deadline = tag.find_all('td')[3].get_text().strip()
                     submit = "期限已到" if tag.find_all('td')[4].get_text().strip() == "期限已過" else "期限未到"
-                    status = tag.find_all('td')[5].get_text().strip()
+                    status = tag.find_all('td')[6].get_text().strip()
                     questions[number] = (deadline, submit, status)
             return questions
         except requests.exceptions.Timeout:
