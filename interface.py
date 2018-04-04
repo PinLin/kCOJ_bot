@@ -127,7 +127,7 @@ class Kuser:
         q_str = ''
         for key in q_dict.keys():
             if q_dict[key][1] == '期限未到':
-                q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
+                q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][3] + "]] [[" + q_dict[key][2] + "]]"
                 q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
                 q_str += "  /question_" + key + "\n\n"
         bot.sendMessage(chat_id, "💁 <b>" + self._username + "</b> " + NAME + "\n"
@@ -148,7 +148,7 @@ class Kuser:
         q_str = ''
         for key in q_dict.keys():
             q_str += "📗" if q_dict[key][1] == '期限未到' else "📕"
-            q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][2] + "]]"
+            q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][3] + "]] [[" + q_dict[key][2] + "]]"
             q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
             q_str += "  /question_" + key + "\n\n"
         reply = bot.sendMessage(chat_id, "💁 <b>" + self._username + "</b> " + NAME + "\n"
@@ -176,7 +176,7 @@ class Kuser:
         q_str = "💁 *" + self._username + "* [" + NAME + "]\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "*" + number + "* (DL: " + q[0] + ")\n [[[" + q[2] + "]]]"
+        q_str += "*" + number + "* (DL: " + q[0] + ")\n [[[" + q[3] + "]]] [[[" + q[2] + "]]]"
         q_str += "⚠️" if q[2] == '未繳' else "✅"
         reply = bot.sendMessage(chat_id, q_str + "\n\n" + content,
             parse_mode='Markdown',
@@ -215,7 +215,7 @@ class Kuser:
         q_str = "💁 <b>" + self._username + "</b> " + NAME + "\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
+        q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n [[" + q[3] + "]] [[" + q[2] + "]]"
         q_str += "⚠️" if q[2] == '未繳' else "✅"
         bot.sendMessage(self._userid, q_str + "\n\n現在請把你的程式碼讓我看看（請別超過 20 MB）\n"
                                              "可以使用「文字訊息」或是「傳送檔案」的方式\n"
@@ -269,7 +269,7 @@ class Kuser:
         q_str = "💁 <b>" + self._username + "</b> " + NAME + "\n"
         q_str += "➖➖➖➖➖\n"
         q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n [[" + q[2] + "]]"
+        q_str += "<b>" + self._question + "</b> (DL: " + q[0] + ")\n [[" + q[3] + "]] [[" + q[2] + "]]"
         q_str += "⚠️" if q[2] == '未繳' else "✅"
         q_str += "<code>\n"
         for passer in self._api.list_passers(self._question):
