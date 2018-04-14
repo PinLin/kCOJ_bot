@@ -1,0 +1,14 @@
+[Unit]
+Description=kcoj_bot services
+After=network.service
+
+[Service]
+Type=simple
+User=pinlin
+ExecStart=/home/pinlin/.pyenv/shims/python3 /home/pinlin/kcoj_bot/bot.py
+ExecStop=/bin/systemctl kill kcoj_bot
+Restart=always
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
