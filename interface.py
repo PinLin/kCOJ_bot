@@ -2,6 +2,7 @@
 
 # modules
 import os
+import sys
 from random import choice
 import telepot
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
@@ -228,7 +229,7 @@ class Kuser:
     def send_answer(self, text, file_id):
         self._status = '正常使用'
         # define filename
-        filename = self._username + self._question
+        filename = sys.path[0] + '/' + self._username + self._question
         if self._api.list_questions()[self._question][3] == 'Python':
             filename += '.py'
         else:

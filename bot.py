@@ -2,6 +2,7 @@
 
 # modules
 import os
+import sys
 import time
 import json
 from pprint import pprint
@@ -153,11 +154,11 @@ def backup_db():
             'status': user._status,
             'question': user._question
         }
-    with open('users.json', 'w') as f:
+    with open(sys.path[0] + '/users.json', 'w') as f:
         json.dump(users_backup, f, indent='  ')
 
 def restore_db():
-    with open('users.json', 'r') as f:
+    with open(sys.path[0] + '/users.json', 'r') as f:
         users_restore = json.load(f)
         for key in users_restore.keys():
             user = users_restore[key]
