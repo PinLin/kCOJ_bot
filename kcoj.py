@@ -43,7 +43,7 @@ class KCOJ:
                     questions[number] = (deadline, submit, status, language)
             return questions
         except requests.exceptions.Timeout:
-            return {'Timeout':('Timeout', 'Timeout', 'Timeout')}
+            return {'Timeout':('Timeout', 'Timeout', 'Timeout', 'Timeout')}
 
     # show the content of the question
     def show_question(self, number):
