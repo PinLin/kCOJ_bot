@@ -128,7 +128,7 @@ def on_chat(msg):
 
             elif user._status == '上傳答案':
                 if user.check_online(chat_id, msg['message_id']) == True:
-                    user.send_answer(msg['text'], '', user.list_questions(chat_id)[user._question][3])
+                    user.send_answer(msg['text'], '')
 
             else:
                 if user.check_online(chat_id, msg['message_id']) == True:
@@ -140,7 +140,7 @@ def on_chat(msg):
                 if msg['document']['file_size'] > 167770000:
                     user.send_failed()
                 else:
-                    user.send_answer('', msg['document']['file_id'], user.list_questions(chat_id)[user._question][3])
+                    user.send_answer('', msg['document']['file_id'])
 
 def backup_db():
     users_backup = {}

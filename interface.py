@@ -225,22 +225,15 @@ class Kuser:
                                                  ["首頁🏠", "回題目📜"]
                                              ], resize_keyboard=True))
 
-    def send_answer(self, text, file_id, language):
+    def send_answer(self, text, file_id):
         self._status = '正常使用'
-        # define filename
-        filename = self._username + self._question
-        if language == 'Python':
-            filename += '.py'
-        else:
-            filename += '.c'
-
         if text != '':
-            with open(filename, 'w') as f:
+            with open(self._username + self._question + '.c', 'w') as f:
                 f.write(text)
         else:
-            bot.download_file(file_id, filename)
+            bot.download_file(file_id, self._username + self._question + '.c')
         self._api.delete_answer(self._question)
-        if self._api.upload_answer(self._question, filename) == True:
+        if self._api.upload_answer(self._question, self._username + self._question + '.c') == True:
             bot.sendMessage(self._userid, "上傳成功",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "回題目📜"],
@@ -253,7 +246,7 @@ class Kuser:
                     ["首頁🏠", "回題目📜"],
                     ["登出🚪", "改密碼💱", "幫助📚"]
                 ], resize_keyboard=True))
-        os.remove(filename)    
+        os.remove(self._username + self._question + '.c')    
     
     def delete_answer(self):
         bot.sendMessage(self._userid, "移除成功" if self._api.delete_answer(self._question) == True else "移除失敗",
