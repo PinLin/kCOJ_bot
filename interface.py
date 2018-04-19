@@ -190,7 +190,7 @@ class Kuser:
             bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=reply['message_id'])
 
     def help(self):
-        bot.sendMessage(self._userid, "這裡是 kC Online Judge Bot！\n"
+        bot.sendMessage(self._userid, "這裡是 Kuo C-Language Online Judge Bot！\n"
                                      "可以簡稱 KCOJ Bot，目前定居於 [" + NAME + "]\n"
                                      "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
                                      "➡️[OJ 傳送門](" + URL + ")\n"
@@ -207,7 +207,7 @@ class Kuser:
                                      "聯絡我請私訊 @PinLin\n"
                                      "原始碼被託管於 GitHub，如果想要鼓勵我的話可以幫我按個星星> </\n"
                                      "網址如下：\n"
-                                     "[https://github.com/PinLin/kcoj_bot]\n\n",
+                                     "[https://github.com/PinLin/KCOJ_bot]\n\n",
                                      parse_mode='Markdown')
 
     def upload_answer(self):

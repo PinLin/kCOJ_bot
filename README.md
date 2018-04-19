@@ -1,4 +1,6 @@
-# kCOJ Bot
+# KCOJ Bot
+
+Kuo C-Language Online Judge Bot
 
 Telegram Bot that is for students in The Great NTUT CSIE. 
 
@@ -14,8 +16,6 @@ It runs as [@kcoj_bot](https://telegram.me/kcoj_bot) now.
   - BeautifulSoup 4
 
 ## Usage
-
-Like this:
 
 ```bash
 while true; do git pull; python3 bot.py; done
