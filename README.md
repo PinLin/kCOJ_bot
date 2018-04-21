@@ -1,6 +1,6 @@
 # KCOJ Bot
 
-Kuo C-Language Online Judge Bot
+Kuo C Online Judge Bot
 
 Telegram Bot that is for students in The Great NTUT CSIE. 
 
