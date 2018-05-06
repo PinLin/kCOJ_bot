@@ -28,128 +28,172 @@ class Kuser:
         self.question = question
         self.api = KCOJ(URL)
 
+    # 新使用者要登入
     def new_user(self):
         self.help()
         self.press_username()
     
+    # 輸入學號
     def press_username(self):
-        self.status = '輸入學號'
         self.question = '題外'
+        self.status = '輸入學號'
         bot.sendMessage(self.userid, "請輸入您的學號：", reply_markup=ReplyKeyboardRemove())
 
+    # 輸入密碼
     def press_password(self, text):
-        self.status = '輸入密碼'
         self.question = '題外'
+        self.status = '輸入密碼'
         self.username = text
         bot.sendMessage(self.userid, 
             "輸入完可刪除訊息以策安全！\n"
-            "請輸入您的密碼：", reply_markup=ReplyKeyboardRemove())
+            "請輸入您的密碼：",
+            reply_markup=ReplyKeyboardRemove())
 
+    # 輸入舊密碼
     def press_oldpassword(self):
-        self.status = '舊的密碼'
         self.question = '題外'
+        self.status = '舊的密碼'
         bot.sendMessage(self.userid, 
             "請輸入要原本的舊密碼：",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠"]
             ], resize_keyboard=True))
 
+    # 輸入新密碼
     def press_newpassword(self, text):
-        if text != self.password:
-            self.status = '正常使用'
-            self.question = '題外'
-            bot.sendMessage(self.userid, "密碼錯誤！",
-                reply_markup=ReplyKeyboardMarkup(keyboard=[
-                    ["首頁🏠"]
-                ], resize_keyboard=True))
-        else:
+        self.question = '題外'
+        # 判斷舊密碼是否輸入正確
+        if text == self.password:
+            # 正確舊密碼
             self.status = '修改密碼'
-            self.question = '題外'
             bot.sendMessage(self.userid, 
                 "使用此功能請務必小心！\n"
                 "請輸入要設定的新密碼：",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠"]
                 ], resize_keyboard=True))
-        
+        else:
+            # 錯誤舊密碼
+            self.status = '正常使用'
+            bot.sendMessage(self.userid, "密碼錯誤！",
+                reply_markup=ReplyKeyboardMarkup(keyboard=[
+                    ["首頁🏠"]
+                ], resize_keyboard=True))
+    
+    # 開始修改密碼
     def change_password(self, text):
-        self.status = '正常使用'
         self.question = '題外'
+        self.status = '正常使用'
         self.password = text
         bot.sendMessage(self.userid, 
-            "修改成功！" if self.api.change_password(self.password) == True else "修改失敗。",
+            "修改成功！" if self.api.change_password(self.password) else "修改失敗。",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠"]
             ], resize_keyboard=True))
 
+    # 執行登入
     def login(self, text):
-        self.status = '正常使用'
         self.question = '題外'
+        self.status = '正常使用'
         self.password = text
         bot.sendMessage(self.userid, "登入中...", reply_markup=ReplyKeyboardRemove())
-        if self.check_online(self.userid) == True:
+        if self.check_online(self.userid):
             self.show_homepage(self.userid)
 
+    # 登入失敗
     def login_failed(self, chat_id, message_id):
-        self.status = '正常使用'
         self.question = '題外'
+        self.status = '正常使用'
+        # 判斷使用者從哪操作
         if chat_id != self.userid:
+            # 從群組操作
             bot.sendMessage(chat_id, "登入失敗，請先私訊我重新登入 KCOJ", reply_to_message_id=message_id)
-        bot.sendMessage(self.userid, "哇...登入失敗，讓我們重新開始", reply_markup=ReplyKeyboardRemove())
+        else:
+            # 從私訊操作
+            bot.sendMessage(self.userid, "哇...登入失敗，讓我們重新開始", reply_markup=ReplyKeyboardRemove())
         self.press_username()
         
+    # 網站連接失敗
     def connect_failed(self, chat_id, message_id):
-        self.status = '正常使用'
         self.question = '題外'
+        self.status = '正常使用'
+        # 群組操作
         if chat_id != self.userid:
             bot.sendMessage(chat_id, "KCOJ 離線中！請稍後再試", reply_to_message_id=message_id)
+        # 私訊操作
         else:
             bot.sendMessage(self.userid, "KCOJ 離線中！請稍後再試",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "幫助📚"]
                 ], resize_keyboard=True))
 
+    # 確認登入是否正常
     def check_online(self, chat_id, message_id=''):
         result = self.api.check_online()
+        # 判斷是否可連接上
         if result == None:
+            # 連接失敗
             self.connect_failed(chat_id, message_id)
             return False
         else:
+            # 連接成功
+            # 判斷是否登入
             if result == False:
+                # 沒有登入的話再嘗試重新登入一次
                 self.api.login(self.username, self.password, 2)
                 result = self.api.check_online()
-            if result == False:
-                self.login_failed(chat_id, message_id)
-            elif result == None:
+            # 再次確認是否登入＆連接
+            if result == None:
+                # 連接失敗
                 self.connect_failed(chat_id, message_id)
-            return result == True
+            elif result == False:
+                # 登入失敗
+                self.login_failed(chat_id, message_id)
+            # 回傳登入狀態
+            return result
 
+    # 登出
     def logout(self):
-        self.status = '正常使用'
         self.question = '題外'
+        self.status = '正常使用'
         bot.sendMessage(self.userid, "您現在已經是登出的狀態。", reply_markup=ReplyKeyboardRemove())
         self.press_username()
 
+    # 秀出主畫面
     def show_homepage(self, chat_id):
-        self.status = '正常使用'
         self.question = '題外'
+        self.status = '正常使用'
+        # 題目列表字典
         q_dict = self.api.list_questions()
+        # 題目列表字串
         q_str = ''
+        # 將字典內容根據格式附加到字串上
         for key in q_dict.keys():
             if q_dict[key][1] == '期限未到':
                 q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][3] + "]] [[" + q_dict[key][2] + "]]"
                 q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
                 q_str += "  /question_" + key + "\n\n"
+        # 顯示主頁面
         bot.sendMessage(chat_id, 
-            "💁 <b>" + self.username + "</b> " + NAME + "\n"
+            # 畫面格式
+            "💁 <b>{NAME}</b> {BOT_NAME}\n"
             "➖➖➖➖➖\n"
-            "📝<i>可繳交的作業</i>\n\n" + q_str + \
-            "➖➖➖➖➖\n" + choice(promote.sentences),
+            "📝<i>可繳交的作業</i>\n"
+            "\n"
+            "{Q_STR}"
+            "➖➖➖➖➖\n"
+            "{PROMOTE}"
+            # 填入資訊
+            "".format(NAME=self.username, BOT_NAME=NAME, Q_STR=q_str, PROMOTE=choice(promote.sentences)), 
             parse_mode='HTML',
-            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["題庫📝"],
-                ["登出🚪", "改密碼💱", "幫助📚"]
-            ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove(),
+            reply_markup=  
+                # 群組內不顯示按鈕
+                ReplyKeyboardRemove() if chat_id != self.userid else
+                # 私訊內顯示按鈕
+                ReplyKeyboardMarkup(keyboard=[
+                    ["題庫📝"],
+                    ["登出🚪", "改密碼💱", "幫助📚"]
+                ], resize_keyboard=True),
             disable_web_page_preview=False)
 
     def list_questions(self, chat_id):
