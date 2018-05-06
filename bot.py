@@ -235,7 +235,7 @@ class Kuser:
                 )
             )
         # 顯示題目列表並將訊息存起來
-        msg = bot.sendMessage(chat_id,
+        last_msg = bot.sendMessage(chat_id,
             # 畫面格式
             "💁 <b>{NAME}</b> {BOT_NAME}\n"
             "➖➖➖➖➖\n"
@@ -258,7 +258,7 @@ class Kuser:
             disable_web_page_preview=False
         )
         # 顯示點我到頂的訊息
-        bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=msg['message_id'])
+        bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=last_msg['message_id'])
 
     # 顯示題目內容
     def show_question(self, number, chat_id):
@@ -277,7 +277,7 @@ class Kuser:
         q_info = self.api.list_questions()[number]
 
         # 顯示題目內容並將訊息存起來
-        msg = bot.sendMessage(chat_id, 
+        last_msg = bot.sendMessage(chat_id, 
             "💁 *{NAME}* [{BOT_NAME}]\n"
             "➖➖➖➖➖\n"
             "{DL_ICON}*{NUM}* (DL: {DL})\n"
@@ -307,7 +307,7 @@ class Kuser:
         )
         if EXT == False:
             # 顯示點我到頂的訊息
-            bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=msg['message_id'])
+            bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=last_msg['message_id'])
 
     def help(self):
         # 印出幫助（？）和關於訊息
@@ -450,7 +450,7 @@ class Kuser:
             q_str += passer + "\n"
         q_str += "</code>"
         # 顯示題目內容並將訊息存起來
-        msg = bot.sendMessage(self.userid, q_str, 
+        last_msg = bot.sendMessage(self.userid, q_str, 
             parse_mode='HTML',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
@@ -458,7 +458,7 @@ class Kuser:
             ], resize_keyboard=True)
         )
         # 顯示點我到頂的訊息
-        bot.sendMessage(self.userid, "點我到名單頂", reply_to_message_id=msg['message_id'])
+        bot.sendMessage(self.userid, "點我到名單頂", reply_to_message_id=last_msg['message_id'])
 
     def list_results(self):
         self.status = '正常使用'
