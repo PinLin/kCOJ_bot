@@ -17,7 +17,6 @@ import promote
 import external
 
 bot = telepot.Bot(TOKEN)
-users = {}
 
 class Kuser:
     def __init__(self, userid, username='', password='', status='第一次用', question='題外'):
@@ -497,129 +496,159 @@ class Kuser:
             ], resize_keyboard=True)
         )
 
+# 使用者物件字典
+users = {}
+
 def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     from_id = msg['from']['id']
 
-    # create a user object
+    # 新增一個使用者物件
     user = Kuser(from_id)
+    # 判斷字典是否已存在該使用者
     if str(from_id) in users:
+        # 已存在所以改用字典的
         user = users[str(from_id)]
     else:
+        # 不存在所以放進字典裡
         users[str(from_id)] = user
 
-    # debug message
+    # 操作記錄
     # ==========================================================
     pprint(msg)
-    # name
+    # 使用者名稱
     if 'last_name' in msg['from']:
         last_name = msg['from']['last_name']
     else:
         last_name = ''
     print("😊 student_name:", msg['from']['first_name'], last_name, "😊")
-    # id
+    # 使用者學號
     print("😯 student_id:", user.username, "😯")
+    # 間隔每個訊息
     print()
     # ==========================================================
 
+    # 如果是文字訊息
     if content_type == 'text':
-        # pre-treat the command
+        # 指令預處理
         command = [msg['text']]
         if msg['text'].startswith('/'):
             command = msg['text'].replace(NAME, '').replace('_', ' ').lower().split(' ')
 
-        # test connection
+        # PING 這個 Bot
         if command[0] == '/ping':
             bot.sendMessage(chat_id, "*PONG*",
                 parse_mode='Markdown',
                 reply_to_message_id=msg['message_id'])
 
-        # help message
+        # 幫助
         elif command[0] == '/help' or command[0] == '幫助📚':
             if chat_type == 'private':
                 user.help()
 
-        # first-time user
+        # 如果是第一次用
         elif user.status == '第一次用':
             if chat_type == 'private':
                 user.new_user()
 
-        # press password
+        # 輸完學號換輸入密碼
         elif user.status == '輸入學號':
             if chat_type == 'private':
                 user.press_password(msg['text'])
 
-        # login
+        # 登入
         elif user.status == '輸入密碼':
             if chat_type == 'private':
                 user.login(msg['text'])
 
-        # homepage
+        # 顯示首頁
         elif command[0] == '/start' or command[0] == '首頁🏠':
             if user.check_online(chat_id, msg['message_id']):
                 user.show_homepage(chat_id)
 
+        # 顯示題庫或特定題目
         elif command[0] == '/question' or command[0] == '題庫📝' or command[0] == '更新🔃':
             if user.check_online(chat_id, msg['message_id']):
+                # 判斷要顯示題庫還是特定題目
                 if len(command) > 1:
+                    # 顯示特定題目
                     user.show_question(command[1], chat_id)
                 else:
+                    # 顯示題庫
                     user.list_questions(chat_id)
 
+        # 只有私訊才可使用的功能
         elif chat_type == 'private':
+            # 修改密碼
             if command[0] == '/password' or command[0] == '改密碼💱':
                 if user.check_online(chat_id, msg['message_id']):
                     user.press_oldpassword()
 
+            # 登出
             elif command[0] == '/logout' or command[0] == '登出🚪':
                 user = Kuser(from_id)
                 users[str(from_id)] = user
                 user.logout()
 
+            # 刪除作業
             elif (command[0] == '/delete' or command[0] == '刪除作業⚔️') and user.question != '題外':
                 if user.check_online(chat_id, msg['message_id']):
                     user.delete_answer()
 
+            # 選擇要上傳的作業
             elif (command[0] == '/upload' or command[0] == '交作業📮') and user.question != '題外':
                 if user.check_online(chat_id, msg['message_id']):
                     user.upload_answer()
 
+            # 看作業執行結果
             elif (command[0] == '/result' or command[0] == '看結果☑️') and user.question != '題外':
                 if user.check_online(chat_id, msg['message_id']):
                     user.list_results()
 
+            # 看本題已通過者
             elif (command[0] == '/passer' or command[0] == '通過者🌐') and user.question != '題外':
                 if user.check_online(chat_id, msg['message_id']):
                     user.list_passers()
 
+            # 回到題目內容
             elif command[0] == '回題目📜' and user.question != '題外':
                 if user.check_online(chat_id, msg['message_id']):
                     user.show_question(user.question, chat_id)
 
+            # 輸完舊密碼要輸新密碼
             elif user.status == '舊的密碼':
                 if user.check_online(chat_id, msg['message_id']):
                     user.press_newpassword(msg['text'])
 
+            # 修改密碼
             elif user.status == '修改密碼':
                 if user.check_online(chat_id, msg['message_id']):
                     user.change_password(msg['text'])
 
+            # 上傳程式碼中
             elif user.status == '上傳答案':
                 if user.check_online(chat_id, msg['message_id']):
                     user.send_answer(msg['text'], '')
 
+            # 使用者傳了其他東西
             else:
                 if user.check_online(chat_id, msg['message_id']):
                     bot.sendMessage(chat_id, "(ˊ・ω・ˋ)")
-            
+
+    # 如果是上傳檔案     
     elif content_type == 'document':
+        # 如果正要上傳程式碼的狀態
         if user.status == '上傳答案' or user.status == '查看題目':
             if user.check_online(chat_id, msg['message_id']):
+                # 判斷有沒有超過限制大小
                 if msg['document']['file_size'] > 167770000:
+                    # 超過了
                     user.send_failed()
                 else:
+                    # 沒超過，上傳
                     user.send_answer('', msg['document']['file_id'])
 
+# 將使用者物件字典備份到 JSON 檔
 def backup_db():
     users_backup = {}
     for key in users.keys():
@@ -634,6 +663,7 @@ def backup_db():
     with open(sys.path[0] + '/users.json', 'w') as f:
         json.dump(users_backup, f, indent='  ')
 
+# 將 JSON 檔還原到使用者物件字典
 def restore_db():
     with open(sys.path[0] + '/users.json', 'r') as f:
         users_restore = json.load(f)
@@ -641,18 +671,18 @@ def restore_db():
             user = users_restore[key]
             users[key] = Kuser(user['userid'], user['username'], user['password'], user['status'], user['question'])
 
-# restore
+# 還原資料
 restore_db()
 
-# start this bot
+# 開始執行
 MessageLoop(bot, on_chat).run_as_thread()
 print("Started! Service is available.")
 
 while True:
     time.sleep(60)
 
-    # keep bot alive
+    # 定期敲 Telegram 讓 Bot 不要死掉
     bot.getMe()
 
-    # backup
+    # 備份資料
     backup_db()
