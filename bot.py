@@ -6,7 +6,6 @@ import sys
 import time
 import json
 from random import choice
-from pprint import pprint
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
@@ -635,7 +634,6 @@ def on_chat(msg):
 
     # 操作記錄
     # ==========================================================
-    pprint(msg)
     # 使用者資訊
     print("😊 USER INFO 😊")
     # 使用者學號
