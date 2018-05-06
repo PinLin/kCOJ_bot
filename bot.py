@@ -428,6 +428,7 @@ class Kuser:
         self.status = '正常使用'
         # 題目資訊字典
         q_info = self.api.list_questions()[self.question]
+        # 題目資訊字串
         q_str = (
             "💁 <b>{NAME}</b> {BOT_NAME}\n"
             "➖➖➖➖➖\n"
@@ -460,24 +461,41 @@ class Kuser:
         # 顯示點我到頂的訊息
         bot.sendMessage(self.userid, "點我到名單頂", reply_to_message_id=last_msg['message_id'])
 
+    # 顯示出成績
     def list_results(self):
         self.status = '正常使用'
+        # 題目資訊字典
         q_info = self.api.list_questions()[self.question]
-        q_str = "💁 <b>" + self.username + "</b> " + NAME + "\n"
-        q_str += "➖➖➖➖➖\n"
-        q_str += "📗" if q_info[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (DL: " + q_info[0] + ")\n"
+        # 題目資訊字串
+        q_str = (
+            "💁 <b>{NAME}</b> {BOT_NAME}\n"
+            "➖➖➖➖➖\n"
+            "{DL_ICON}<b>{NUM}</b> (DL: {DL})\n"
+            " [[{LANG}]]\n"
+            "\n".format(
+                NAME=self.username,
+                BOT_NAME=NAME,
+                DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
+                NUM=self.question,
+                DL=q_info[0],
+                LANG=q_info[3]
+            )
+        )
+        # 列出測試結果
         for result in self.api.list_results(self.question, self.username):
-            q_str += "\n測試編號 <code>" + result[0] + "</code>："
-            q_str += "✔️ " if result[1] == '通過測試' else "❌ "
-            q_str += result[1]
+            q_str += "測試編號 <code>{}</code>：{} {}\n".format(
+                result[0],
+                "✔️ " if result[1] == '通過測試' else "❌ ",
+                result[1]
+            )
         bot.sendMessage(self.userid, q_str, 
             parse_mode='HTML', 
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
                 ["交作業📮" if q_info[1] == '期限未到' else '', "通過者🌐"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
-            ], resize_keyboard=True))
+            ], resize_keyboard=True)
+        )
 
 def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
