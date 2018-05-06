@@ -9,7 +9,7 @@ from pprint import pprint
 import telepot
 from telepot.loop import MessageLoop
 # config
-from config import NAME, TOKEN, ADMIN
+from config import NAME, TOKEN
 from interface import Kuser
 
 bot = telepot.Bot(TOKEN)
@@ -42,14 +42,6 @@ def on_chat(msg):
         command = [msg['text']]
         if msg['text'].startswith('/'):
             command = msg['text'].replace(NAME, '').replace('_', ' ').lower().split(' ')
-
-        # restart this bot
-        if command[0] == '/restart' and str(from_id) in ADMIN:
-            bot.sendMessage(chat_id, "即將更新並重新啟動")
-            print("Restarting...")
-            backup_db()
-            time.sleep(1)
-            os._exit(0)
 
         # test connection
         elif command[0] == '/ping':
