@@ -260,6 +260,7 @@ class Kuser:
         # 顯示點我到頂的訊息
         bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=msg['message_id'])
 
+    # 顯示題目內容
     def show_question(self, number, chat_id):
         self.question = number
         self.status = '查看題目'
@@ -309,6 +310,7 @@ class Kuser:
             bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=msg['message_id'])
 
     def help(self):
+        # 印出幫助（？）和關於訊息
         bot.sendMessage(self.userid, 
             "這裡是 Kuo C Online Judge Bot！\n"
             "可以簡稱 KCOJ Bot，目前定居於 [{BOT_NAME}]\n"
@@ -331,94 +333,140 @@ class Kuser:
             parse_mode='Markdown'
         )
 
+    # 使用者選擇程式碼來上傳
     def upload_answer(self):
         self.status = '上傳答案'
-        q = self.api.list_questions()[self.question]
-        q_str = "💁 <b>" + self.username + "</b> " + NAME + "\n"
-        q_str += "➖➖➖➖➖\n"
-        q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n [[" + q[3] + "]] [[" + q[2] + "]]"
-        q_str += "⚠️" if q[2] == '未繳' else "✅"
-        bot.sendMessage(self.userid, 
-            q_str + "\n\n現在請把你的程式碼讓我看看（請別超過 20 MB）\n"
+        # 題目資訊字典
+        q_info = self.api.list_questions()[self.question]
+        bot.sendMessage(self.userid,
+            "💁 <b>{NAME}</b> {BOT_NAME}\n"
+            "➖➖➖➖➖\n"
+            "{DL_ICON}<b>{NUM}</b> (DL: {DL})\n"
+            " [[{LANG}]] [[{STATUS}]]{STAT_ICON}\n"
+            "\n"
+            "現在請把你的程式碼讓我看看（請別超過 20 MB）\n"
             "可以使用「文字訊息」或是「傳送檔案」的方式\n"
-            "（注意：可在程式碼前後加上單獨成行的 ``` 避免可能的錯誤。）", parse_mode='HTML',
-            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["刪除作業⚔️"] if self.api.list_questions()[self.question][2] == '已繳' else [],
-                ["首頁🏠", "回題目📜"]
-            ], resize_keyboard=True))
+            "（注意：可在程式碼前後加上單獨成行的 ``` 避免可能的錯誤。）".format(
+                NAME=self.username,
+                BOT_NAME=NAME,
+                DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
+                NUM=self.question,
+                DL=q_info[0],
+                LANG=q_info[3],
+                STATUS=q_info[2],
+                STAT_ICON=("⚠️" if q_info[2] == '未繳' else "✅")
+            ), 
+            parse_mode='HTML',
+            reply_markup=
+                ReplyKeyboardMarkup(keyboard=[
+                    ["刪除作業⚔️"] if self.api.list_questions()[self.question][2] == '已繳' else [],
+                    ["首頁🏠", "回題目📜"]
+                ], resize_keyboard=True)
+        )
 
+    # 上傳程式碼
     def send_answer(self, text, file_id):
         self.status = '正常使用'
-        # define filename
+        # 定義檔名
         filename = sys.path[0] + '/' + self.username + self.question
         if self.api.list_questions()[self.question][3] == 'Python':
             filename += '.py'
         else:
             filename += '.c'
-
+        # 判斷使用者要用什麼方式傳程式碼
         if text != '':
+            # 傳送文字
             with open(filename, 'w') as f:
                 f.write(text)
         else:
+            # 傳送檔案
             bot.download_file(file_id, filename)
+        # 先把原本的答案刪掉
         self.api.delete_answer(self.question)
-        if self.api.upload_answer(self.question, filename) == True:
+        # 上傳並判斷是否成功
+        if self.api.upload_answer(self.question, filename):
+            # 上傳成功
             bot.sendMessage(self.userid, "上傳成功",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "回題目📜"],
                     ["看結果☑️"],
                     ["登出🚪", "改密碼💱", "幫助📚"]
-                ], resize_keyboard=True))
+                ], resize_keyboard=True)
+            )
         else:
+            # 上傳失敗
             bot.sendMessage(self.userid, "上傳失敗",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "回題目📜"],
                     ["登出🚪", "改密碼💱", "幫助📚"]
-                ], resize_keyboard=True))
+                ], resize_keyboard=True)
+            )
+        # 移除上傳的檔案
         os.remove(filename)    
     
+    # 刪除之前繳交的程式碼
     def delete_answer(self):
-        bot.sendMessage(self.userid, "移除成功" if self.api.delete_answer(self.question) == True else "移除失敗",
+        bot.sendMessage(self.userid, "移除成功" if self.api.delete_answer(self.question) else "移除失敗",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
-            ], resize_keyboard=True))
+            ], resize_keyboard=True)
+        )
 
+    # 上傳失敗（預設立場是檔案太大）
     def send_failed(self):
         self.status = '正常使用'
         bot.sendMessage(self.userid, "檔案不能超過 20 MB！上傳失敗",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
-            ], resize_keyboard=True))
+            ], resize_keyboard=True)
+    )
 
+    # 列出題目中已通過者的名單
     def list_passers(self):
         self.status = '正常使用'
-        q = self.api.list_questions()[self.question]
-        q_str = "💁 <b>" + self.username + "</b> " + NAME + "\n"
-        q_str += "➖➖➖➖➖\n"
-        q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n [[" + q[3] + "]] [[" + q[2] + "]]"
-        q_str += "⚠️" if q[2] == '未繳' else "✅"
-        q_str += "<code>\n"
+        # 題目資訊字典
+        q_info = self.api.list_questions()[self.question]
+        q_str = (
+            "💁 <b>{NAME}</b> {BOT_NAME}\n"
+            "➖➖➖➖➖\n"
+            "{DL_ICON}<b>{NUM}</b> (DL: {DL})\n"
+            " [[{LANG}]] [[{STATUS}]]{STAT_ICON}\n"
+            "\n".format(
+                NAME=self.username,
+                BOT_NAME=NAME,
+                DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
+                NUM=self.question,
+                DL=q_info[0],
+                LANG=q_info[3],
+                STATUS=q_info[2],
+                STAT_ICON=("⚠️" if q_info[2] == '未繳' else "✅")
+            )
+        )
+        # 列出已通過者名單
+        q_str += "<code>"
         for passer in self.api.list_passers(self.question):
-            q_str += "\n" + passer
-        reply = bot.sendMessage(self.userid, q_str + "</code>", 
+            q_str += passer + "\n"
+        q_str += "</code>"
+        # 顯示題目內容並將訊息存起來
+        msg = bot.sendMessage(self.userid, q_str, 
             parse_mode='HTML',
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
-            ], resize_keyboard=True))
-        bot.sendMessage(self.userid, "點我到名單頂", reply_to_message_id=reply['message_id'])
+            ], resize_keyboard=True)
+        )
+        # 顯示點我到頂的訊息
+        bot.sendMessage(self.userid, "點我到名單頂", reply_to_message_id=msg['message_id'])
 
     def list_results(self):
         self.status = '正常使用'
-        q = self.api.list_questions()[self.question]
+        q_info = self.api.list_questions()[self.question]
         q_str = "💁 <b>" + self.username + "</b> " + NAME + "\n"
         q_str += "➖➖➖➖➖\n"
-        q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "<b>" + self.question + "</b> (DL: " + q[0] + ")\n"
+        q_str += "📗" if q_info[1] == '期限未到' else "📕"
+        q_str += "<b>" + self.question + "</b> (DL: " + q_info[0] + ")\n"
         for result in self.api.list_results(self.question, self.username):
             q_str += "\n測試編號 <code>" + result[0] + "</code>："
             q_str += "✔️ " if result[1] == '通過測試' else "❌ "
@@ -427,7 +475,7 @@ class Kuser:
             parse_mode='HTML', 
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠", "回題目📜"],
-                ["交作業📮" if q[1] == '期限未到' else '', "通過者🌐"],
+                ["交作業📮" if q_info[1] == '期限未到' else '', "通過者🌐"],
                 ["登出🚪", "改密碼💱", "幫助📚"]
             ], resize_keyboard=True))
 
