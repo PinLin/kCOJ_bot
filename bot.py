@@ -513,21 +513,6 @@ def on_chat(msg):
         # 不存在所以放進字典裡
         users[str(from_id)] = user
 
-    # 操作記錄
-    # ==========================================================
-    pprint(msg)
-    # 使用者名稱
-    if 'last_name' in msg['from']:
-        last_name = msg['from']['last_name']
-    else:
-        last_name = ''
-    print("😊 student_name:", msg['from']['first_name'], last_name, "😊")
-    # 使用者學號
-    print("😯 student_id:", user.username, "😯")
-    # 間隔每個訊息
-    print()
-    # ==========================================================
-
     # 如果是文字訊息
     if content_type == 'text':
         # 指令預處理
@@ -647,6 +632,47 @@ def on_chat(msg):
                 else:
                     # 沒超過，上傳
                     user.send_answer('', msg['document']['file_id'])
+
+    # 操作記錄
+    # ==========================================================
+    pprint(msg)
+    # 使用者資訊
+    print("😊 USER INFO 😊")
+    # 使用者學號
+    print("    student_id:", user.username)
+    # telegram ID
+    if 'username' in msg['from']:
+        print("    telegram_id:", "@" + msg['from']['username'])
+    # 使用者名稱
+    if 'last_name' in msg['from']:
+        last_name = msg['from']['last_name']
+    else:
+        last_name = ''
+    print("    name:", msg['from']['first_name'], last_name)
+    # 使用者狀態
+    print("😆 STATUS 😆")
+    print("    status:", user.status)
+    print("    question:", user.question)
+    # 聊天種類
+    print("😎 CHAT 😎")
+    print("    type:", msg['chat']['type'])
+    if msg['chat']['type'] != 'private':
+        print("    title:", msg['chat']['title'])
+    # 使用者傳送文字
+    if 'text' in msg:
+        print("😯 TEXT 😯")
+        print("    text:", msg['text'])
+    if 'caption' in msg:
+        print("😯 TEXT 😯")
+        print("    text: ", msg['caption'])
+    # 使用者傳送檔案
+    if 'document' in msg:
+        print("😠 DOCUMENT 😠")
+        print("    file_name:", msg['document']['file_name'])
+        print("    file_id:", msg['document']['file_id'])
+    # 間隔每個訊息
+    print()
+    # ==========================================================
 
 # 將使用者物件字典備份到 JSON 檔
 def backup_db():
