@@ -318,14 +318,6 @@ def on_chat(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     from_id = msg['from']['id']
 
-    # debug message
-    pprint(msg)
-    print('content_type:', content_type)
-    print('chat_type:', chat_type)
-    print('chat_id:', chat_id)
-    print('from_id:', from_id)
-    print()
-
     # create a user object
     user = Kuser(from_id)
     if str(from_id) in users:
@@ -333,8 +325,19 @@ def on_chat(msg):
     else:
         users[str(from_id)] = user
 
-    # just want to know
-    print('student_id:', user._username)
+    # debug message
+    # ==========================================================
+    pprint(msg)
+    # name
+    if 'last_name' in msg['from']:
+        last_name = msg['from']['last_name']
+    else:
+        last_name = ''
+    print("😊 student_name:", msg['from']['first_name'], last_name, "😊")
+    # id
+    print("😯 student_id:", user._username, "😯")
+    print()
+    # ==========================================================
 
     if content_type == 'text':
         # pre-treat the command
