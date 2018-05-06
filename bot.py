@@ -43,7 +43,7 @@ def on_chat(msg):
             command = msg['text'].replace(NAME, '').replace('_', ' ').lower().split(' ')
 
         # test connection
-        elif command[0] == '/ping':
+        if command[0] == '/ping':
             bot.sendMessage(chat_id, "*PONG*",
             parse_mode='Markdown',
             reply_to_message_id=msg['message_id'])
