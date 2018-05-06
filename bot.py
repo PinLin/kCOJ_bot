@@ -633,9 +633,9 @@ def on_chat(msg):
                     user.send_answer('', msg['document']['file_id'])
 
     # 操作記錄
-    # ==========================================================
+    print("=====================================")
     # 使用者資訊
-    print("😊 USER INFO 😊")
+    print("😊 INFO")
     # 使用者學號
     print("    student_id:", user.username)
     # telegram ID
@@ -648,29 +648,26 @@ def on_chat(msg):
         last_name = ''
     print("    name:", msg['from']['first_name'], last_name)
     # 使用者狀態
-    print("😆 STATUS 😆")
+    print("😆 STATUS")
     print("    status:", user.status)
     print("    question:", user.question)
     # 聊天種類
-    print("😎 CHAT 😎")
+    print("😎 CHAT")
     print("    type:", msg['chat']['type'])
     if msg['chat']['type'] != 'private':
         print("    title:", msg['chat']['title'])
     # 使用者傳送文字
     if 'text' in msg:
-        print("😯 TEXT 😯")
+        print("😯 TEXT")
         print("    text:", msg['text'])
     if 'caption' in msg:
-        print("😯 TEXT 😯")
+        print("😯 TEXT")
         print("    text: ", msg['caption'])
     # 使用者傳送檔案
     if 'document' in msg:
-        print("😠 DOCUMENT 😠")
+        print("😠 DOCUMENT")
         print("    file_name:", msg['document']['file_name'])
         print("    file_id:", msg['document']['file_id'])
-    # 間隔每個訊息
-    print()
-    # ==========================================================
 
 # 將使用者物件字典備份到 JSON 檔
 def backup_db():
