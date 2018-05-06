@@ -47,7 +47,8 @@ class Kuser:
         bot.sendMessage(self.userid, 
             "輸入完可刪除訊息以策安全！\n"
             "請輸入您的密碼：",
-            reply_markup=ReplyKeyboardRemove())
+            reply_markup=ReplyKeyboardRemove()
+        )
 
     # 輸入舊密碼
     def press_oldpassword(self):
@@ -57,7 +58,8 @@ class Kuser:
             "請輸入要原本的舊密碼：",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠"]
-            ], resize_keyboard=True))
+            ], resize_keyboard=True)
+        )
 
     # 輸入新密碼
     def press_newpassword(self, text):
@@ -71,14 +73,16 @@ class Kuser:
                 "請輸入要設定的新密碼：",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠"]
-                ], resize_keyboard=True))
+                ], resize_keyboard=True)
+            )
         else:
             # 錯誤舊密碼
             self.status = '正常使用'
             bot.sendMessage(self.userid, "密碼錯誤！",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠"]
-                ], resize_keyboard=True))
+                ], resize_keyboard=True)
+            )
     
     # 開始修改密碼
     def change_password(self, text):
@@ -89,7 +93,8 @@ class Kuser:
             "修改成功！" if self.api.change_password(self.password) else "修改失敗。",
             reply_markup=ReplyKeyboardMarkup(keyboard=[
                 ["首頁🏠"]
-            ], resize_keyboard=True))
+            ], resize_keyboard=True)
+        )
 
     # 執行登入
     def login(self, text):
@@ -125,7 +130,8 @@ class Kuser:
             bot.sendMessage(self.userid, "KCOJ 離線中！請稍後再試",
                 reply_markup=ReplyKeyboardMarkup(keyboard=[
                     ["首頁🏠", "幫助📚"]
-                ], resize_keyboard=True))
+                ], resize_keyboard=True)
+            )
 
     # 確認登入是否正常
     def check_online(self, chat_id, message_id=''):
@@ -169,10 +175,19 @@ class Kuser:
         q_str = ''
         # 將字典內容根據格式附加到字串上
         for key in q_dict.keys():
+            # 只顯示期限未到的作業
             if q_dict[key][1] == '期限未到':
-                q_str += "📗<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][3] + "]] [[" + q_dict[key][2] + "]]"
-                q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
-                q_str += "  /question_" + key + "\n\n"
+                q_str += (
+                    "📗<b>{NUM}</b> (DL: {DL})\n"
+                    " [[{LANG}]] [[{STATUS}]]{STAT_ICON}  /question_{NUM}\n"
+                    "\n".format(
+                        NUM=key,
+                        DL=q_dict[key][0],
+                        LANG=q_dict[key][3],
+                        STATUS=q_dict[key][2],
+                        STAT_ICON=("⚠️" if q_dict[key][2] == '未繳' else "✅")
+                    )
+                )
         # 顯示主頁面
         bot.sendMessage(chat_id, 
             # 畫面格式
@@ -194,7 +209,8 @@ class Kuser:
                     ["題庫📝"],
                     ["登出🚪", "改密碼💱", "幫助📚"]
                 ], resize_keyboard=True),
-            disable_web_page_preview=False)
+            disable_web_page_preview=False
+        )
 
     def list_questions(self, chat_id):
         self.status = '正常使用'
