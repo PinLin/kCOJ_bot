@@ -189,7 +189,7 @@ class Kuser:
                     )
                 )
         # 顯示主頁面
-        bot.sendMessage(chat_id, 
+        bot.sendMessage(chat_id,
             # 畫面格式
             "💁 <b>{NAME}</b> {BOT_NAME}\n"
             "➖➖➖➖➖\n"
@@ -212,75 +212,124 @@ class Kuser:
             disable_web_page_preview=False
         )
 
+    # 列出題目列表
     def list_questions(self, chat_id):
-        self.status = '正常使用'
         self.question = '題外'
+        self.status = '正常使用'
+        # 題目列表字典
         q_dict = self.api.list_questions()
+        # 題目列表字串
         q_str = ''
+        # 將字典內容根據格式附加到字串上
         for key in q_dict.keys():
-            q_str += "📗" if q_dict[key][1] == '期限未到' else "📕"
-            q_str += "<b>" + key + "</b> (DL: " + q_dict[key][0] + ")\n [[" + q_dict[key][3] + "]] [[" + q_dict[key][2] + "]]"
-            q_str += "⚠️" if q_dict[key][2] == '未繳' else "✅"
-            q_str += "  /question_" + key + "\n\n"
-        reply = bot.sendMessage(chat_id, 
-            "💁 <b>" + self.username + "</b> " + NAME + "\n"
+            q_str += (
+                "{DL_ICON}<b>{NUM}</b> (DL: {DL})\n"
+                " [[{LANG}]] [[{STATUS}]]{STAT_ICON}  /question_{NUM}\n"
+                "\n".format(
+                    DL_ICON=("📗" if q_dict[key][1] == '期限未到' else "📕"),
+                    NUM=key,
+                    DL=q_dict[key][0],
+                    LANG=q_dict[key][3],
+                    STATUS=q_dict[key][2],
+                    STAT_ICON=("⚠️" if q_dict[key][2] == '未繳' else "✅")
+                )
+            )
+        # 顯示題目列表並將訊息存起來
+        msg = bot.sendMessage(chat_id,
+            # 畫面格式
+            "💁 <b>{NAME}</b> {BOT_NAME}\n"
             "➖➖➖➖➖\n"
-            "📝<i>所有作業</i>\n\n" + q_str + \
-            "➖➖➖➖➖\n" + choice(promote.sentences),
+            "📝<i>所有作業</i>\n"
+            "\n"
+            "{Q_STR}"
+            "➖➖➖➖➖\n"
+            "{PROMOTE}"
+            # 填入資訊
+            "".format(NAME=self.username, BOT_NAME=NAME, Q_STR=q_str, PROMOTE=choice(promote.sentences)),
             parse_mode='HTML',
-            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["首頁🏠", "更新🔃"],
-                ["登出🚪", "改密碼💱", "幫助📚"]
-            ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove(),
-            disable_web_page_preview=False)
-        bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=reply['message_id'])
+            reply_markup=
+                # 群組內不顯示按鈕
+                ReplyKeyboardRemove() if chat_id != self.userid else 
+                # 私訊內顯示按鈕
+                ReplyKeyboardMarkup(keyboard=[
+                    ["首頁🏠", "更新🔃"],
+                    ["登出🚪", "改密碼💱", "幫助📚"]
+                ], resize_keyboard=True) ,
+            disable_web_page_preview=False
+        )
+        # 顯示點我到頂的訊息
+        bot.sendMessage(chat_id, "點我到題庫頂", reply_to_message_id=msg['message_id'])
 
     def show_question(self, number, chat_id):
-        self.status = '查看題目'
         self.question = number
+        self.status = '查看題目'
+        # 如果外部有指定題目內容
         if number in external.QUESTION:
-            ext_q = True
+            # 顯示外部內容
+            EXT = True
             content = external.QUESTION[number]
         else:
-            ext_q = False
-            content = '```\n' + self.api.show_question(number) + '\n```'
-        q = self.api.list_questions()[number]
-        q_str = "💁 *" + self.username + "* [" + NAME + "]\n"
-        q_str += "➖➖➖➖➖\n"
-        q_str += "📗" if q[1] == '期限未到' else "📕"
-        q_str += "*" + number + "* (DL: " + q[0] + ")\n [[[" + q[3] + "]]] [[[" + q[2] + "]]]"
-        q_str += "⚠️" if q[2] == '未繳' else "✅"
-        reply = bot.sendMessage(chat_id, q_str + "\n\n" + content,
+            # 顯示內部內容
+            EXT = False
+            content = '```' + self.api.show_question(number) + '```'
+        # 題目資訊字典
+        q_info = self.api.list_questions()[number]
+
+        # 顯示題目內容並將訊息存起來
+        msg = bot.sendMessage(chat_id, 
+            "💁 *{NAME}* [{BOT_NAME}]\n"
+            "➖➖➖➖➖\n"
+            "{DL_ICON}*{NUM}* (DL: {DL})\n"
+            " [[[{LANG}]]] [[[{STATUS}]]]{STAT_ICON}\n"
+            "\n"
+            "{CONTENT}\n".format(
+                NAME=self.username,
+                BOT_NAME=NAME,
+                DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
+                NUM=number,
+                DL=q_info[0],
+                LANG=q_info[3],
+                STATUS=q_info[2],
+                STAT_ICON=("⚠️" if q_info[2] == '未繳' else "✅"),
+                CONTENT=content
+            ),
             parse_mode='Markdown',
-            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ["首頁🏠", "題庫📝"],
-                ["交作業📮" if q[1] == '期限未到' else '', "看結果☑️" if q[2] == '已繳' else '', "通過者🌐"],
-                ["登出🚪", "改密碼💱", "幫助📚"]
-            ], resize_keyboard=True) if chat_id == self.userid else ReplyKeyboardRemove())
-        if ext_q == False:
-            bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=reply['message_id'])
+            reply_markup=
+                # 群組內不顯示按鈕
+                ReplyKeyboardRemove() if chat_id != self.userid else
+                # 私訊內顯示按鈕
+                ReplyKeyboardMarkup(keyboard=[
+                    ["首頁🏠", "題庫📝"],
+                    ["交作業📮" if q_info[1] == '期限未到' else '', "看結果☑️" if q_info[2] == '已繳' else '', "通過者🌐"],
+                    ["登出🚪", "改密碼💱", "幫助📚"]
+                ], resize_keyboard=True)
+        )
+        if EXT == False:
+            # 顯示點我到頂的訊息
+            bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=msg['message_id'])
 
     def help(self):
         bot.sendMessage(self.userid, 
             "這裡是 Kuo C Online Judge Bot！\n"
-            "可以簡稱 KCOJ Bot，目前定居於 [" + NAME + "]\n"
+            "可以簡稱 KCOJ Bot，目前定居於 [{BOT_NAME}]\n"
             "作用是讓大家可以方便的透過我使用郭老程設課的 Online Judge\n"
-            "➡️[OJ 傳送門](" + URL + ")\n"
+            "➡️[OJ 傳送門]({URL})\n"
             "操作很簡單（？）\n\n"
             "還是稍微提幾個需要注意的地方：\n"
             "1. 📗代表還可以繳交的作業，📕代表已經不能繳交的作業\n"
             "2. ⚠️代表還沒有繳交的作業，✅代表已經繳交的作業\n"
             "3. 其實在查看題目的畫面就可以用「拖曳」的方式 *上傳作業📮*\n"
             "4. *刪除作業⚔️* 的功能被放在 *上傳作業📮* 裡面\n"
-            "5. 學號與密碼將以「明文」方式儲存\n"
+            "5. 學號與密碼將以「明文」方式儲存，因為....\n"
             "6. 郭老的 Online Judge 其實也是以「明文」方式儲存您的帳號密碼\n"
             "7. 我以我的人格擔保，不會使用您提供的資訊侵害您的權利\n\n"
             "本專案採用 *MIT License*\n"
             "聯絡我請私訊 @PinLin\n"
             "原始碼被託管於 GitHub，如果想要鼓勵我的話可以幫我按個星星> </\n"
             "網址如下：\n"
-            "[https://github.com/PinLin/KCOJ_bot]\n\n",
-            parse_mode='Markdown')
+            "[https://github.com/PinLin/KCOJ_bot]".format(BOT_NAME=NAME, URL=URL),
+            parse_mode='Markdown'
+        )
 
     def upload_answer(self):
         self.status = '上傳答案'
