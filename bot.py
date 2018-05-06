@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 # modules
-import os
 import sys
 import time
 import json
