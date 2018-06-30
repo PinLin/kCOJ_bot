@@ -1,0 +1,3 @@
+[submodule "KCOJ_api"]
+	path = KCOJ_api
+	url = https://github.com/kcoj/KCOJ_api.git

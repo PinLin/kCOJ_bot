@@ -11,7 +11,7 @@ from telepot.loop import MessageLoop
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 # config
 from config import NAME, URL, TOKEN
-from kcoj import KCOJ
+from KCOJ_api.kcoj import KCOJ
 import promote
 import external
 
