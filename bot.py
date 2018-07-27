@@ -144,7 +144,7 @@ class Kuser:
             # 判斷是否登入
             if result == False:
                 # 沒有登入的話再嘗試重新登入一次
-                self.api.login(self.username, self.password, 2)
+                self.api.login(self.username, self.password, 4)
                 result = self.api.check_online()
             # 再次確認是否登入＆連接
             if result == None:
