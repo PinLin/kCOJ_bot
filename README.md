@@ -18,7 +18,9 @@ It runs as [@kcoj_bot](https://telegram.me/kcoj_bot) now.
 ## Usage
 
 ```bash
-while true; do git pull; python3 bot.py; done
+pip3 install -r requirements.txt
+
+python3 bot.py
 ```
 
 ## License
@@ -27,4 +29,6 @@ MIT License
 
 ## Picture
 
-![](https://github.com/PinLin/kcoj_bot/blob/master/image/image-merge12.png?raw=true)
+| demo1 | demo2 |
+| --- | ----- |
+|![demo1](https://imgur.com/TqdVLOU.png)|![demo2](https://imgur.com/q7pCxVn.png)|
