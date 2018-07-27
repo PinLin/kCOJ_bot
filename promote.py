@@ -16,4 +16,11 @@ sentences = [
     r"(ˊ・ω・ˋ)",
     r"(ˊ・ω・ˋ)(ˊ・ω・ˋ)",
     r"(ˊ・ω・ˋ)(ˊ・ω・ˋ)(ˊ・ω・ˋ)",
+    r"現在有網頁版本的 KCOJ 囉！\nhttps://kcoj.ntut.com.tw",
+    r"現在有網頁版本的 KCOJ 囉！\nhttps://kcoj.ntut.com.tw",
+    r"現在有網頁版本的 KCOJ 囉！\nhttps://kcoj.ntut.com.tw",
+    r"現在有網頁版本的 KCOJ 囉！\nhttps://kcoj.ntut.com.tw",
+    r"現在有網頁版本的 KCOJ 囉！\nhttps://kcoj.ntut.com.tw",
+    r"現在有網頁版本的 KCOJ 囉！\nhttps://kcoj.ntut.com.tw",
+    r"現在有網頁版本的 KCOJ 囉！\nhttps://kcoj.ntut.com.tw",
 ]
