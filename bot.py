@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-# modules
 import os
 import sys
 import time
@@ -12,12 +11,13 @@ from telepot.loop import MessageLoop
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from KCOJ_api import KCOJ
 
-# config
-from config import NAME, URL, TOKEN
 import promote
 import external
 
-bot = telepot.Bot(TOKEN)
+with open('config.json', 'r') as f:
+    config = json.load(f)
+
+bot = telepot.Bot(config['BOT']['TOKEN'])
 
 class Kuser:
     def __init__(self, userid, username='', password='', status='第一次用', question='outside'):
@@ -26,7 +26,7 @@ class Kuser:
         self.password = password
         self.status = status
         self.question = question
-        self.api = KCOJ(URL)
+        self.api = KCOJ(config['TARGET']['URL'])
 
     # 新使用者要登入
     def new_user(self):
@@ -199,7 +199,7 @@ class Kuser:
             "➖➖➖➖➖\n"
             "{PROMOTE}"
             # 填入資訊
-            "".format(NAME=self.username, BOT_NAME=NAME, Q_STR=q_str, PROMOTE=choice(promote.sentences)), 
+            "".format(NAME=self.username, BOT_NAME=config['BOT']['NAME'], Q_STR=q_str, PROMOTE=choice(promote.sentences)), 
             parse_mode='HTML',
             reply_markup=  
                 # 群組內不顯示按鈕
@@ -245,7 +245,7 @@ class Kuser:
             "➖➖➖➖➖\n"
             "{PROMOTE}"
             # 填入資訊
-            "".format(NAME=self.username, BOT_NAME=NAME, Q_STR=q_str, PROMOTE=choice(promote.sentences)),
+            "".format(NAME=self.username, BOT_NAME=config['BOT']['NAME'], Q_STR=q_str, PROMOTE=choice(promote.sentences)),
             parse_mode='HTML',
             reply_markup=
                 # 群組內不顯示按鈕
@@ -285,7 +285,7 @@ class Kuser:
             "\n"
             "{CONTENT}\n".format(
                 NAME=self.username,
-                BOT_NAME=NAME,
+                BOT_NAME=config['BOT']['NAME'],
                 DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
                 NUM=number,
                 DL=q_info[0],
@@ -329,7 +329,7 @@ class Kuser:
             "聯絡我請私訊 @PinLin\n"
             "原始碼被託管於 GitHub，如果想要鼓勵我的話可以幫我按個星星> </\n"
             "網址如下：\n"
-            "[https://github.com/PinLin/KCOJ_bot]".format(BOT_NAME=NAME, URL=URL),
+            "[https://github.com/PinLin/KCOJ_bot]".format(BOT_NAME=config['BOT']['NAME'], URL=config['TARGET']['URL']),
             parse_mode='Markdown'
         )
 
@@ -348,7 +348,7 @@ class Kuser:
             "可以使用「文字訊息」或是「傳送檔案」的方式\n"
             "（注意：可在程式碼前後加上單獨成行的 ``` 避免可能的錯誤。）".format(
                 NAME=self.username,
-                BOT_NAME=NAME,
+                BOT_NAME=config['BOT']['NAME'],
                 DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
                 NUM=self.question,
                 DL=q_info[0],
@@ -436,7 +436,7 @@ class Kuser:
             " [[{LANG}]] [[{STATUS}]]{STAT_ICON}\n"
             "\n".format(
                 NAME=self.username,
-                BOT_NAME=NAME,
+                BOT_NAME=config['BOT']['NAME'],
                 DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
                 NUM=self.question,
                 DL=q_info[0],
@@ -474,7 +474,7 @@ class Kuser:
             " [[{LANG}]]\n"
             "\n".format(
                 NAME=self.username,
-                BOT_NAME=NAME,
+                BOT_NAME=config['BOT']['NAME'],
                 DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
                 NUM=self.question,
                 DL=q_info[0],
@@ -519,7 +519,7 @@ def on_chat(msg):
         # 指令預處理
         command = [msg['text']]
         if msg['text'].startswith('/'):
-            command = msg['text'].replace(NAME, '').replace('_', ' ').lower().split(' ')
+            command = msg['text'].replace(config['BOT']['NAME'], '').replace('_', ' ').lower().split(' ')
 
         # PING 這個 Bot
         if command[0] == '/ping':
