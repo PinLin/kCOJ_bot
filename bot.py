@@ -12,7 +12,6 @@ from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from KCOJ_api import KCOJ
 
 import promote
-import external
 
 with open('config.json', 'r') as f:
     config = json.load(f)
@@ -264,15 +263,8 @@ class Kuser:
     def show_question(self, number, chat_id):
         self.question = number
         self.status = '查看題目'
-        # 如果外部有指定題目內容
-        if number in external.QUESTION:
-            # 顯示外部內容
-            EXT = True
-            content = external.QUESTION[number]
-        else:
-            # 顯示內部內容
-            EXT = False
-            content = '```' + self.api.show_question(number) + '```'
+        # 題目內容
+        content = '```' + self.api.show_question(number) + '```'
         # 題目資訊字典
         q_info = self.api.list_questions()[number]
 
@@ -305,9 +297,8 @@ class Kuser:
                     ["登出🚪", "改密碼💱", "幫助📚"]
                 ], resize_keyboard=True)
         )
-        if EXT == False:
-            # 顯示點我到頂的訊息
-            bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=last_msg['message_id'])
+        # 顯示點我到頂的訊息
+        bot.sendMessage(chat_id, "點我到題目頂", reply_to_message_id=last_msg['message_id'])
 
     def help(self):
         # 印出幫助（？）和關於訊息
