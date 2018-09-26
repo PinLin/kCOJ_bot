@@ -1,3 +1,4 @@
 telepot
 requests
 bs4
+KCOJ_api<=1.0

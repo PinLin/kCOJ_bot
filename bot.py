@@ -6,12 +6,14 @@ import sys
 import time
 import json
 from random import choice
+
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from KCOJ_api import KCOJ
+
 # config
 from config import NAME, URL, TOKEN
-from KCOJ_api.kcoj import KCOJ
 import promote
 import external
 
