@@ -10,10 +10,11 @@ It runs as [@kcoj_bot](https://telegram.me/kcoj_bot) now.
 
 ## Requirements
 
-- Python 3.6
+- Python 3.6+
   - telepot
   - requests
-  - BeautifulSoup 4
+  - bs4
+  - KCOJ_api
 
 ## Usage
 
