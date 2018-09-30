@@ -723,7 +723,7 @@ def on_chat(msg):
         if user.status == '上傳答案' or user.status == '查看題目':
             if user.keep_online(chat_id, msg['message_id']):
                 # 判斷有沒有超過限制大小
-                if msg['document']['file_size'] > 167770000:
+                if msg['document']['file_size'] > 2097152:
                     # 超過了
                     user.send_failed()
                 else:
