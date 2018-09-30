@@ -107,7 +107,7 @@ class Kuser:
         self.question = 'outside'
         self.status = '正常使用'
         # 判斷是否修改
-        if self.api.change_password(text):
+        if self.api.update_password(text):
             content = "修改成功！"
             # 修改紀錄的密碼
             self.password = text
@@ -164,28 +164,23 @@ class Kuser:
 
     # 確認登入是否正常
     def keep_online(self, chat_id, message_id=''):
-        result = self.api.check_online()
-        # 判斷是否可連接上
-        if result == None:
-            # 連接失敗
+        active = self.api.active
+        # 連接不上伺服器
+        if active == None:
             self.connect_failed(chat_id, message_id)
             return False
-        else:
-            # 連接成功
-            # 判斷是否登入
-            if result == False:
-                # 沒有登入的話再嘗試重新登入一次
-                self.api.login(self.username, self.password, 4)
-                result = self.api.check_online()
-            # 再次確認是否登入＆連接
-            if result == None:
-                # 連接失敗
-                self.connect_failed(chat_id, message_id)
-            elif result == False:
+
+        # 判斷是否登入
+        if not active:
+            # 沒有登入的話嘗試重新登入（4 為 107-1 郭老課的課程序號）
+            self.api.login(self.username, self.password, 4)
+            active = self.api.active
+            # 再次確認是否登入
+            if not active:
                 # 登入失敗
                 self.login_failed(chat_id, message_id)
-            # 回傳登入狀態
-            return result
+        # 回傳登入狀態
+        return active
 
     # 登出
     def logout(self):
@@ -201,35 +196,35 @@ class Kuser:
         self.status = '正常使用'
 
         # 訊息內容
-        content = """
+        content = '''
         💁 <b>{USERNAME}</b> {BOT_NAME}
         ➖➖➖➖➖
         📝<i>可繳交的作業</i>
         {QUESTIONS}
         ➖➖➖➖➖
         {SENTENCES}
-        """.replace('        ', '')
+        '''.replace('        ', '')
 
         # 題目資訊列表
         questions = ''
-        data = self.api.list_questions()
+        data = self.api.get_question()
         for number in data.keys():
             # 跳過期限已到的作業
-            if data[number][1] == '期限已到':
+            if data[number]['expired']:
                 continue
             # 題目資訊模板
-            question = """
+            question = '''
             {DL_ICON}<b>{NUMBER}</b> (DL: {DL})
              [[{LANG}]] [[{STATUS}]]{STAT_ICON}  /question_{NUMBER}
-            """.replace('            ', '')
+            '''.replace('            ', '')
             # 串接到列表上
             questions += question.format(
-                DL_ICON=("📗" if data[number][1] == '期限未到' else "📕"),
+                DL_ICON=("📕" if data[number]['expired'] else "📗"),
                 NUMBER=number,
-                DL=data[number][0],
-                LANG=data[number][3],
-                STATUS=data[number][2],
-                STAT_ICON=("⚠️" if data[number][2] == '未繳' else "✅"))
+                DL=data[number]['deadline'],
+                LANG=data[number]['language'],
+                STATUS=("已繳" if data[number]['status'] else "未繳"),
+                STAT_ICON=("✅" if data[number]['status'] else "⚠️"))
 
         content = content.format(USERNAME=self.username,
                                  BOT_NAME=config['BOT']['NAME'],
@@ -267,7 +262,7 @@ class Kuser:
 
         # 題目資訊列表
         questions = ''
-        data = self.api.list_questions()
+        data = self.api.get_question()
         # 將字典內容根據格式附加到字串上
         for number in data.keys():
             # 題目資訊模板
@@ -277,12 +272,12 @@ class Kuser:
             '''.replace('            ', '')
             # 串接到列表上
             questions += question.format(
-                DL_ICON=("📗" if data[number][1] == '期限未到' else "📕"),
+                DL_ICON=("📕" if data[number]['expired'] else "📗"),
                 NUMBER=number,
-                DL=data[number][0],
-                LANG=data[number][3],
-                STATUS=data[number][2],
-                STAT_ICON=("⚠️" if data[number][2] == '未繳' else "✅"))
+                DL=data[number]['deadline'],
+                LANG=data[number]['language'],
+                STATUS=("已繳" if data[number]['status'] else "未繳"),
+                STAT_ICON=("✅" if data[number]['status'] else "⚠️"))
 
         content = content.format(USERNAME=self.username,
                                  BOT_NAME=config['BOT']['NAME'],
@@ -296,7 +291,7 @@ class Kuser:
         else:
             # 私訊內顯示按鈕
             reply_markup = ReplyKeyboardMarkup(keyboard=[
-                ['首頁🏠', "更新🔃"],
+                ['首頁🏠', '更新🔃'],
                 ['登出🚪', '改密碼💱', '幫助📚']
             ], resize_keyboard=True)
 
@@ -311,46 +306,47 @@ class Kuser:
     def show_question_content(self, number, chat_id):
         self.question = number
         self.status = '查看題目'
-        # 題目內容
+        # 訊息內容
+        content = '''
+        💁 *{NAME}* [{BOT_NAME}]
+        ➖➖➖➖➖
+        {DL_ICON}*{NUM}* (DL: {DL})
+         [[[{LANG}]]] [[[{STATUS}]]]{STAT_ICON}
         
-        content = '```' + self.api.show_question(number) + '```'
-        # 題目資訊字典
-        q_info = self.api.list_questions()[number]
+        ```{QUESTION_CONTENT}```
+        '''.replace('        ', '')
+        # 取得題目資訊
+        info = self.api.get_question()[number]
+        content = content.format(
+            NAME=self.username,
+            BOT_NAME=config['BOT']['NAME'],
+            DL_ICON=("📕" if info['expired'] else "📗"),
+            NUM=number,
+            DL=info['deadline'],
+            LANG=info['language'],
+            STATUS=("已繳" if info['status'] else "未繳"),
+            STAT_ICON=("✅" if info['status'] else "⚠️"),
+            QUESTION_CONTENT=self.api.get_question_content(number))
+
+        if chat_id != self.userid:
+            # 群組內不顯示按鈕
+            reply_markup = ReplyKeyboardRemove()
+        else:
+            # 私訊內顯示按鈕
+            reply_markup = ReplyKeyboardMarkup(keyboard=[
+                ['首頁🏠', '題庫📝'],
+                ['交作業📮' if not info['expired'] else '',
+                    '看結果☑️' if info['status'] else '',
+                    '通過者🌐'],
+                ['登出🚪', '改密碼💱', '幫助📚']
+            ], resize_keyboard=True)
 
         # 顯示題目內容並將訊息存起來
-        last_msg = bot.sendMessage(chat_id,
-                                   "💁 *{NAME}* [{BOT_NAME}]\n"
-                                   "➖➖➖➖➖\n"
-                                   "{DL_ICON}*{NUM}* (DL: {DL})\n"
-                                   " [[[{LANG}]]] [[[{STATUS}]]]{STAT_ICON}\n"
-                                   "\n"
-                                   "{CONTENT}\n".format(
-                                       NAME=self.username,
-                                       BOT_NAME=config['BOT']['NAME'],
-                                       DL_ICON=(
-                                           "📗" if q_info[1] == '期限未到' else "📕"),
-                                       NUM=number,
-                                       DL=q_info[0],
-                                       LANG=q_info[3],
-                                       STATUS=q_info[2],
-                                       STAT_ICON=(
-                                           "⚠️" if q_info[2] == '未繳' else "✅"),
-                                       CONTENT=content
-                                   ),
-                                   parse_mode='Markdown',
-                                   reply_markup=# 群組內不顯示按鈕
-                                   ReplyKeyboardRemove() if chat_id != self.userid else
-                                   # 私訊內顯示按鈕
-                                   ReplyKeyboardMarkup(keyboard=[
-                                       ['首頁🏠', '題庫📝'],
-                                       ["交作業📮" if q_info[1] == '期限未到' else '',
-                                        '看結果☑️' if q_info[2] == '已繳' else '', "通過者🌐"],
-                                       ['登出🚪', '改密碼💱', '幫助📚']
-                                   ], resize_keyboard=True)
-                                   )
+        msg = bot.sendMessage(chat_id, content, parse_mode='Markdown',
+                              reply_markup=reply_markup)
         # 顯示點我到頂的訊息
         bot.sendMessage(chat_id, "點我到題目頂",
-                        reply_to_message_id=last_msg['message_id'])
+                        reply_to_message_id=msg['message_id'])
 
     def show_help(self):
         # 幫助（？）和關於訊息
@@ -384,36 +380,36 @@ class Kuser:
     # 使用者選擇程式碼來上傳
     def upload_answer(self):
         self.status = '上傳答案'
-
+        # 訊息內容
         content = """
         💁 <b>{NAME}</b> {BOT_NAME}
         ➖➖➖➖➖
-        {DL_ICON}<b>{NUM}</b> (DL: {DL})
+        {DL_ICON}<b>{NUMBER}</b> (DL: {DL})
          [[{LANG}]] [[{STATUS}]]{STAT_ICON}
         
-        現在請把你的程式碼讓我看看（請別超過 20 MB）
+        現在請把你的程式碼讓我看看（20 MB 以下）
         可以使用「文字訊息」或是「傳送檔案」的方式
-        （注意：可在程式碼前後加上單獨成行的 ``` 避免可能的錯誤。）
+        （可在程式碼前後加上單獨成行的 ``` 避免可能的錯誤。）
         """.replace('        ', '')
-
-        # 題目資訊字典
-        q_info = self.api.list_questions()[self.question]
-        bot.sendMessage(self.userid, content.format(
+        # 取得題目資訊
+        info = self.api.get_question()[self.question]
+        content = content.format(
             NAME=self.username,
             BOT_NAME=config['BOT']['NAME'],
-            DL_ICON=("📗" if q_info[1] == '期限未到' else "📕"),
-            NUM=self.question,
-            DL=q_info[0],
-            LANG=q_info[3],
-            STATUS=q_info[2],
-            STAT_ICON=("⚠️" if q_info[2] == '未繳' else "✅")
-        ),
-            parse_mode='HTML',
-            reply_markup=ReplyKeyboardMarkup(keyboard=[
-                ['刪除作業⚔️'] if self.api.list_questions(
-                )[self.question][2] == '已繳' else [],
-                ['首頁🏠', '回題目📜']
-            ], resize_keyboard=True))
+            DL_ICON=("📕" if info['expired'] else "📗"),
+            NUMBER=self.question,
+            DL=info['deadline'],
+            LANG=info['language'],
+            STATUS=("已繳" if info['status'] else "未繳"),
+            STAT_ICON=("✅" if info['status'] else "⚠️"))
+        # 訊息鍵盤
+        keyboard = [
+            ['刪除作業⚔️'] if info['status'] else [],
+            ['首頁🏠', '回題目📜']
+        ]
+        # 發送訊息
+        bot.sendMessage(self.userid, content, parse_mode='HTML',
+                        reply_markup=ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True))
 
     # 上傳程式碼
     def send_answer(self, text, file_id):
@@ -433,9 +429,9 @@ class Kuser:
             # 傳送檔案
             bot.download_file(file_id, filename)
         # 先把原本的答案刪掉
-        self.api.delete_answer(self.question)
+        self.api.delete_question_answer(self.question)
         # 上傳並判斷是否成功
-        if self.api.upload_answer(self.question, filename):
+        if self.api.post_question_answer(self.question, "Send from KCOJ_bot", filename):
             # 上傳成功
             bot.sendMessage(self.userid, "上傳成功",
                             reply_markup=ReplyKeyboardMarkup(keyboard=[
@@ -457,7 +453,7 @@ class Kuser:
 
     # 刪除之前繳交的程式碼
     def delete_answer(self):
-        bot.sendMessage(self.userid, "移除成功" if self.api.delete_answer(self.question) else "移除失敗",
+        bot.sendMessage(self.userid, "移除成功" if self.api.delete_question_answer(self.question) else "移除失敗",
                         reply_markup=ReplyKeyboardMarkup(keyboard=[
                             ['首頁🏠', '回題目📜'],
                             ['登出🚪', '改密碼💱', '幫助📚']
@@ -498,7 +494,7 @@ class Kuser:
         )
         # 列出已通過者名單
         q_str += "<code>"
-        for passer in self.api.list_passers(self.question):
+        for passer in self.api.get_question_passers(self.question):
             q_str += passer + "\n"
         q_str += "</code>"
         # 顯示題目內容並將訊息存起來
@@ -544,7 +540,7 @@ class Kuser:
                         parse_mode='HTML',
                         reply_markup=ReplyKeyboardMarkup(keyboard=[
                             ['首頁🏠', '回題目📜'],
-                            ["交作業📮" if q_info[1] == '期限未到' else '', "通過者🌐"],
+                            ['交作業📮' if q_info[1] == '期限未到' else '', '通過者🌐'],
                             ['登出🚪', '改密碼💱', '幫助📚']
                         ], resize_keyboard=True)
                         )
