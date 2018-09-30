@@ -54,19 +54,19 @@ class Kuser:
         self.api = KCOJ(config['TARGET']['URL'])
 
     # 新使用者要登入
-    def new_user(self):
-        self.help()
-        self.press_username()
+    def create_user(self):
+        self.show_help()
+        self.input_username()
 
     # 輸入學號
-    def press_username(self):
+    def input_username(self):
         self.question = 'outside'
         self.status = '輸入學號'
         bot.sendMessage(self.userid, "請輸入您的學號：",
                         reply_markup=ReplyKeyboardRemove())
 
     # 輸入密碼
-    def press_password(self, text):
+    def input_password(self, text):
         self.question = 'outside'
         self.status = '輸入密碼'
         self.username = text
@@ -75,7 +75,7 @@ class Kuser:
                         reply_markup=ReplyKeyboardRemove())
 
     # 輸入舊密碼
-    def press_oldpassword(self):
+    def input_oldpassword(self):
         self.question = 'outside'
         self.status = '舊的密碼'
         bot.sendMessage(self.userid, "請輸入要原本的舊密碼：",
@@ -84,7 +84,7 @@ class Kuser:
                         ], resize_keyboard=True))
 
     # 輸入新密碼
-    def press_newpassword(self, text):
+    def input_newpassword(self, text):
         self.question = 'outside'
         # 判斷舊密碼是否輸入正確
         if text == self.password:
@@ -128,9 +128,9 @@ class Kuser:
         bot.sendMessage(self.userid, "登入中...",
                         reply_markup=ReplyKeyboardRemove())
         # 嘗試登入
-        if self.check_online(self.userid):
+        if self.keep_online(self.userid):
             # 進入首頁
-            self.show_homepage(self.userid)
+            self.show_home(self.userid)
 
     # 登入失敗
     def login_failed(self, chat_id, message_id):
@@ -145,7 +145,7 @@ class Kuser:
             # 從私訊操作
             bot.sendMessage(self.userid, "哇...登入失敗，讓我們重新開始",
                             reply_markup=ReplyKeyboardRemove())
-        self.press_username()
+        self.input_username()
 
     # 網站連接失敗
     def connect_failed(self, chat_id, message_id):
@@ -163,7 +163,7 @@ class Kuser:
                             ], resize_keyboard=True))
 
     # 確認登入是否正常
-    def check_online(self, chat_id, message_id=''):
+    def keep_online(self, chat_id, message_id=''):
         result = self.api.check_online()
         # 判斷是否可連接上
         if result == None:
@@ -193,10 +193,10 @@ class Kuser:
         self.status = '正常使用'
         bot.sendMessage(self.userid, "您現在已經是登出的狀態。",
                         reply_markup=ReplyKeyboardRemove())
-        self.press_username()
+        self.input_username()
 
     # 秀出主畫面
-    def show_homepage(self, chat_id):
+    def show_home(self, chat_id):
         self.question = 'outside'
         self.status = '正常使用'
 
@@ -252,7 +252,7 @@ class Kuser:
                         reply_markup=reply_markup)
 
     # 列出題目列表
-    def list_questions(self, chat_id):
+    def show_questions(self, chat_id):
         self.question = 'outside'
         self.status = '正常使用'
         # 訊息內容
@@ -308,7 +308,7 @@ class Kuser:
                         reply_to_message_id=msg['message_id'])
 
     # 顯示題目內容
-    def show_question(self, number, chat_id):
+    def show_question_content(self, number, chat_id):
         self.question = number
         self.status = '查看題目'
         # 題目內容
@@ -352,7 +352,7 @@ class Kuser:
         bot.sendMessage(chat_id, "點我到題目頂",
                         reply_to_message_id=last_msg['message_id'])
 
-    def help(self):
+    def show_help(self):
         # 幫助（？）和關於訊息
         content = """
         這裡是 Kuo C Online Judge Bot！
@@ -386,15 +386,15 @@ class Kuser:
         self.status = '上傳答案'
 
         content = """
-            💁 <b>{NAME}</b> {BOT_NAME}\n
-            ➖➖➖➖➖\n
-            {DL_ICON}<b>{NUM}</b> (DL: {DL})\n
-             [[{LANG}]] [[{STATUS}]]{STAT_ICON}\n
-            \n
-            現在請把你的程式碼讓我看看（請別超過 20 MB）\n
-            可以使用「文字訊息」或是「傳送檔案」的方式\n
-            （注意：可在程式碼前後加上單獨成行的 ``` 避免可能的錯誤。）
-            """.replace('            ', '')
+        💁 <b>{NAME}</b> {BOT_NAME}
+        ➖➖➖➖➖
+        {DL_ICON}<b>{NUM}</b> (DL: {DL})
+         [[{LANG}]] [[{STATUS}]]{STAT_ICON}
+        
+        現在請把你的程式碼讓我看看（請別超過 20 MB）
+        可以使用「文字訊息」或是「傳送檔案」的方式
+        （注意：可在程式碼前後加上單獨成行的 ``` 避免可能的錯誤。）
+        """.replace('        ', '')
 
         # 題目資訊字典
         q_info = self.api.list_questions()[self.question]
@@ -585,17 +585,17 @@ def on_chat(msg):
         # 幫助
         elif command[0] == '/help' or command[0] == '幫助📚':
             if chat_type == 'private':
-                user.help()
+                user.show_help()
 
         # 如果是第一次用
         elif user.status == '第一次用':
             if chat_type == 'private':
-                user.new_user()
+                user.create_user()
 
         # 輸完學號換輸入密碼
         elif user.status == '輸入學號':
             if chat_type == 'private':
-                user.press_password(msg['text'])
+                user.input_password(msg['text'])
 
         # 登入
         elif user.status == '輸入密碼':
@@ -604,26 +604,26 @@ def on_chat(msg):
 
         # 顯示首頁
         elif command[0] == '/start' or command[0] == '首頁🏠':
-            if user.check_online(chat_id, msg['message_id']):
-                user.show_homepage(chat_id)
+            if user.keep_online(chat_id, msg['message_id']):
+                user.show_home(chat_id)
 
         # 顯示題庫或特定題目
         elif command[0] == '/question' or command[0] == '題庫📝' or command[0] == '更新🔃':
-            if user.check_online(chat_id, msg['message_id']):
+            if user.keep_online(chat_id, msg['message_id']):
                 # 判斷要顯示題庫還是特定題目
                 if len(command) > 1:
                     # 顯示特定題目
-                    user.show_question(command[1], chat_id)
+                    user.show_question_content(command[1], chat_id)
                 else:
                     # 顯示題庫
-                    user.list_questions(chat_id)
+                    user.show_questions(chat_id)
 
         # 只有私訊才可使用的功能
         elif chat_type == 'private':
             # 修改密碼
             if command[0] == '/password' or command[0] == '改密碼💱':
-                if user.check_online(chat_id, msg['message_id']):
-                    user.press_oldpassword()
+                if user.keep_online(chat_id, msg['message_id']):
+                    user.input_oldpassword()
 
             # 登出
             elif command[0] == '/logout' or command[0] == '登出🚪':
@@ -633,54 +633,54 @@ def on_chat(msg):
 
             # 刪除作業
             elif (command[0] == '/delete' or command[0] == '刪除作業⚔️') and user.question != 'outside':
-                if user.check_online(chat_id, msg['message_id']):
+                if user.keep_online(chat_id, msg['message_id']):
                     user.delete_answer()
 
             # 選擇要上傳的作業
             elif (command[0] == '/upload' or command[0] == '交作業📮') and user.question != 'outside':
-                if user.check_online(chat_id, msg['message_id']):
+                if user.keep_online(chat_id, msg['message_id']):
                     user.upload_answer()
 
             # 看作業執行結果
             elif (command[0] == '/result' or command[0] == '看結果☑️') and user.question != 'outside':
-                if user.check_online(chat_id, msg['message_id']):
+                if user.keep_online(chat_id, msg['message_id']):
                     user.list_results()
 
             # 看本題已通過者
             elif (command[0] == '/passer' or command[0] == '通過者🌐') and user.question != 'outside':
-                if user.check_online(chat_id, msg['message_id']):
+                if user.keep_online(chat_id, msg['message_id']):
                     user.list_passers()
 
             # 回到題目內容
             elif command[0] == '回題目📜' and user.question != 'outside':
-                if user.check_online(chat_id, msg['message_id']):
-                    user.show_question(user.question, chat_id)
+                if user.keep_online(chat_id, msg['message_id']):
+                    user.show_question_content(user.question, chat_id)
 
             # 輸完舊密碼要輸新密碼
             elif user.status == '舊的密碼':
-                if user.check_online(chat_id, msg['message_id']):
-                    user.press_newpassword(msg['text'])
+                if user.keep_online(chat_id, msg['message_id']):
+                    user.input_newpassword(msg['text'])
 
             # 修改密碼
             elif user.status == '修改密碼':
-                if user.check_online(chat_id, msg['message_id']):
+                if user.keep_online(chat_id, msg['message_id']):
                     user.change_password(msg['text'])
 
             # 上傳程式碼中
             elif user.status == '上傳答案':
-                if user.check_online(chat_id, msg['message_id']):
+                if user.keep_online(chat_id, msg['message_id']):
                     user.send_answer(msg['text'], '')
 
             # 使用者傳了其他東西
             else:
-                if user.check_online(chat_id, msg['message_id']):
+                if user.keep_online(chat_id, msg['message_id']):
                     bot.sendMessage(chat_id, "(ˊ・ω・ˋ)")
 
     # 如果是上傳檔案
     elif content_type == 'document':
         # 如果正要上傳程式碼的狀態
         if user.status == '上傳答案' or user.status == '查看題目':
-            if user.check_online(chat_id, msg['message_id']):
+            if user.keep_online(chat_id, msg['message_id']):
                 # 判斷有沒有超過限制大小
                 if msg['document']['file_size'] > 167770000:
                     # 超過了
