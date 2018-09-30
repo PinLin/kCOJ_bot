@@ -9,6 +9,7 @@ from random import choice
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from pymongo import MongoClient
 from KCOJ_api import KCOJ
 
 sentences = [
@@ -41,17 +42,56 @@ sentences = [
 with open('config.json', 'r') as f:
     config = json.load(f)
 
+# 取得 Bot 實體
 bot = telepot.Bot(config['BOT']['TOKEN'])
+# 取得資料庫實體
+db = MongoClient().kcoj_bot
 
 
 class Kuser:
-    def __init__(self, userid, username=None, password=None, status='第一次用', question=None):
-        self.userid = userid
-        self.username = username
-        self.password = password
-        self.status = status
-        self.question = question
+    def __init__(self, uid):
+        self.uid = uid
         self.api = KCOJ(config['TARGET']['URL'])
+
+    @property
+    def username(self):
+        obj = db.users.find_one({'uid': self.uid})
+        return obj and obj['username']
+
+    @username.setter
+    def username(self, username):
+        db.users.update({'uid': self.uid}, {
+                        "$set": {"username": username}}, upsert=True)
+
+    @property
+    def password(self):
+        obj = db.users.find_one({'uid': self.uid})
+        return obj and obj['password']
+
+    @password.setter
+    def password(self, password):
+        db.users.update({'uid': self.uid}, {
+                        "$set": {"password": password}}, upsert=True)
+
+    @property
+    def status(self):
+        obj = db.users.find_one({'uid': self.uid})
+        return obj and obj['status']
+
+    @status.setter
+    def status(self, status):
+        db.users.update({'uid': self.uid}, {
+                        "$set": {"status": status}}, upsert=True)
+
+    @property
+    def question(self):
+        obj = db.users.find_one({'uid': self.uid})
+        return obj and obj['question']
+
+    @question.setter
+    def question(self, question):
+        db.users.update({'uid': self.uid}, {
+                        "$set": {"question": question}}, upsert=True)
 
     # 新使用者要登入
     def create_user(self):
@@ -62,7 +102,7 @@ class Kuser:
     def input_username(self):
         self.question = None
         self.status = '輸入學號'
-        bot.sendMessage(self.userid, "請輸入您的學號：",
+        bot.sendMessage(self.uid, "請輸入您的學號：",
                         reply_markup=ReplyKeyboardRemove())
 
     # 輸入密碼
@@ -71,14 +111,14 @@ class Kuser:
         self.status = '輸入密碼'
         self.username = text
         # 發送訊息
-        bot.sendMessage(self.userid, "輸入完可刪除訊息以策安全！\n請輸入您的密碼：",
+        bot.sendMessage(self.uid, "輸入完可刪除訊息以策安全！\n請輸入您的密碼：",
                         reply_markup=ReplyKeyboardRemove())
 
     # 輸入舊密碼
     def input_oldpassword(self):
         self.question = None
         self.status = '舊的密碼'
-        bot.sendMessage(self.userid, "請輸入要原本的舊密碼：",
+        bot.sendMessage(self.uid, "請輸入要原本的舊密碼：",
                         reply_markup=ReplyKeyboardMarkup(keyboard=[
                             ['首頁🏠']
                         ], resize_keyboard=True))
@@ -90,14 +130,14 @@ class Kuser:
         if text == self.password:
             # 正確舊密碼
             self.status = '修改密碼'
-            bot.sendMessage(self.userid, "請輸入要設定的新密碼：",
+            bot.sendMessage(self.uid, "請輸入要設定的新密碼：",
                             reply_markup=ReplyKeyboardMarkup(keyboard=[
                                 ['首頁🏠']
                             ], resize_keyboard=True))
         else:
             # 錯誤舊密碼
             self.status = '正常使用'
-            bot.sendMessage(self.userid, "密碼錯誤！",
+            bot.sendMessage(self.uid, "密碼錯誤！",
                             reply_markup=ReplyKeyboardMarkup(keyboard=[
                                 ['首頁🏠']
                             ], resize_keyboard=True))
@@ -114,7 +154,7 @@ class Kuser:
         else:
             content = "修改失敗。"
         # 發送訊息
-        bot.sendMessage(self.userid, content,
+        bot.sendMessage(self.uid, content,
                         reply_markup=ReplyKeyboardMarkup(keyboard=[
                             ['首頁🏠']
                         ], resize_keyboard=True))
@@ -125,25 +165,25 @@ class Kuser:
         self.status = '正常使用'
         self.password = text
         # 發送訊息
-        bot.sendMessage(self.userid, "登入中...",
+        bot.sendMessage(self.uid, "登入中...",
                         reply_markup=ReplyKeyboardRemove())
         # 嘗試登入
-        if self.keep_online(self.userid):
+        if self.keep_online(self.uid):
             # 進入首頁
-            self.show_home(self.userid)
+            self.show_home(self.uid)
 
     # 登入失敗
     def login_failed(self, chat_id, message_id):
         self.question = None
         self.status = '正常使用'
         # 判斷使用者從哪操作
-        if chat_id != self.userid:
+        if chat_id != self.uid:
             # 從群組操作
             bot.sendMessage(chat_id, "登入失敗，請先私訊我重新登入 KCOJ",
                             reply_to_message_id=message_id)
         else:
             # 從私訊操作
-            bot.sendMessage(self.userid, "哇...登入失敗，讓我們重新開始",
+            bot.sendMessage(self.uid, "哇...登入失敗，讓我們重新開始",
                             reply_markup=ReplyKeyboardRemove())
         self.input_username()
 
@@ -152,12 +192,12 @@ class Kuser:
         self.question = None
         self.status = '正常使用'
         # 群組操作
-        if chat_id != self.userid:
+        if chat_id != self.uid:
             bot.sendMessage(chat_id, "KCOJ 離線中！請稍後再試",
                             reply_to_message_id=message_id)
         # 私訊操作
         else:
-            bot.sendMessage(self.userid, "KCOJ 離線中！請稍後再試",
+            bot.sendMessage(self.uid, "KCOJ 離線中！請稍後再試",
                             reply_markup=ReplyKeyboardMarkup(keyboard=[
                                 ['首頁🏠', '幫助📚']
                             ], resize_keyboard=True))
@@ -186,7 +226,7 @@ class Kuser:
     def logout(self):
         self.question = None
         self.status = '正常使用'
-        bot.sendMessage(self.userid, "您現在已經是登出的狀態。",
+        bot.sendMessage(self.uid, "您現在已經是登出的狀態。",
                         reply_markup=ReplyKeyboardRemove())
         self.input_username()
 
@@ -232,7 +272,7 @@ class Kuser:
                                  SENTENCES=choice(sentences))
 
         # 訊息鍵盤
-        if chat_id != self.userid:
+        if chat_id != self.uid:
             # 群組內不顯示按鈕
             reply_markup = ReplyKeyboardRemove()
         else:
@@ -285,7 +325,7 @@ class Kuser:
                                  SENTENCES=choice(sentences))
 
         # 訊息鍵盤
-        if chat_id != self.userid:
+        if chat_id != self.uid:
             # 群組內不顯示按鈕
             reply_markup = ReplyKeyboardRemove()
         else:
@@ -328,7 +368,7 @@ class Kuser:
             STAT_ICON=("✅" if info['status'] else "⚠️"),
             QUESTION_CONTENT=self.api.get_question_content(number))
 
-        if chat_id != self.userid:
+        if chat_id != self.uid:
             # 群組內不顯示按鈕
             reply_markup = ReplyKeyboardRemove()
         else:
@@ -375,7 +415,7 @@ class Kuser:
             BOT_NAME=config['BOT']['NAME'],
             TARGET_URL=config['TARGET']['URL'])
         # 傳送訊息
-        bot.sendMessage(self.userid, content, parse_mode='Markdown')
+        bot.sendMessage(self.uid, content, parse_mode='Markdown')
 
     # 使用者選擇程式碼來上傳
     def upload_answer(self):
@@ -408,7 +448,7 @@ class Kuser:
             ['首頁🏠', '回題目📜']
         ]
         # 發送訊息
-        bot.sendMessage(self.userid, content, parse_mode='HTML',
+        bot.sendMessage(self.uid, content, parse_mode='HTML',
                         reply_markup=ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True))
 
     # 上傳程式碼
@@ -433,7 +473,7 @@ class Kuser:
         # 上傳並判斷是否成功
         if self.api.post_question_answer(self.question, "Send from KCOJ_bot", filename):
             # 上傳成功
-            bot.sendMessage(self.userid, "上傳成功",
+            bot.sendMessage(self.uid, "上傳成功",
                             reply_markup=ReplyKeyboardMarkup(keyboard=[
                                 ['首頁🏠', '回題目📜'],
                                 ['看結果☑️'],
@@ -442,7 +482,7 @@ class Kuser:
                             )
         else:
             # 上傳失敗
-            bot.sendMessage(self.userid, "上傳失敗",
+            bot.sendMessage(self.uid, "上傳失敗",
                             reply_markup=ReplyKeyboardMarkup(keyboard=[
                                 ['首頁🏠', '回題目📜'],
                                 ['登出🚪', '改密碼💱', '幫助📚']
@@ -459,7 +499,7 @@ class Kuser:
         else:
             content = "移除失敗"
         # 發送訊息
-        bot.sendMessage(self.userid, content,
+        bot.sendMessage(self.uid, content,
                         reply_markup=ReplyKeyboardMarkup(keyboard=[
                             ['首頁🏠', '回題目📜'],
                             ['登出🚪', '改密碼💱', '幫助📚']
@@ -468,7 +508,7 @@ class Kuser:
     # 上傳失敗（預設立場是檔案太大）
     def send_failed(self):
         self.status = '正常使用'
-        bot.sendMessage(self.userid, "檔案不能超過 2 MB！上傳失敗",
+        bot.sendMessage(self.uid, "檔案不能超過 2 MB！上傳失敗",
                         reply_markup=ReplyKeyboardMarkup(keyboard=[
                             ['首頁🏠', '回題目📜'],
                             ['登出🚪', '改密碼💱', '幫助📚']
@@ -504,13 +544,13 @@ class Kuser:
             STAT_ICON=("✅" if info['status'] else "⚠️"),
             PASSERS=passers)
         # 發送訊息
-        msg = bot.sendMessage(self.userid, content, parse_mode='HTML',
+        msg = bot.sendMessage(self.uid, content, parse_mode='HTML',
                               reply_markup=ReplyKeyboardMarkup(keyboard=[
                                   ['首頁🏠', '回題目📜'],
                                   ['登出🚪', '改密碼💱', '幫助📚']
                               ], resize_keyboard=True))
         # 顯示點我到頂的訊息
-        bot.sendMessage(self.userid, "點我到名單頂",
+        bot.sendMessage(self.uid, "點我到名單頂",
                         reply_to_message_id=msg['message_id'])
 
     # 顯示出成績
@@ -543,7 +583,7 @@ class Kuser:
             STAT_ICON=("✅" if info['status'] else "⚠️"),
             RESULTS=results)
         # 發送訊息
-        bot.sendMessage(self.userid, content, parse_mode='HTML',
+        bot.sendMessage(self.uid, content, parse_mode='HTML',
                         reply_markup=ReplyKeyboardMarkup(keyboard=[
                             ['首頁🏠', '回題目📜'],
                             ['交作業📮' if not info['expired'] else '', '通過者🌐'],
@@ -589,7 +629,7 @@ def on_chat(msg):
                 user.show_help()
 
         # 如果是第一次用
-        elif user.status == '第一次用':
+        elif user.status == None:
             if chat_type == 'private':
                 user.create_user()
 
@@ -727,40 +767,6 @@ def on_chat(msg):
         print("    file_name:", msg['document']['file_name'])
         print("    file_id:", msg['document']['file_id'])
 
-# 將使用者物件字典備份到 JSON 檔
-
-
-def backup_db():
-    users_backup = {}
-    for key in users.keys():
-        user = users[key]
-        users_backup[key] = {
-            'userid': user.userid,
-            'username': user.username,
-            'password': user.password,
-            'status': user.status,
-            'question': user.question
-        }
-    with open(sys.path[0] + '/users.json', 'w') as f:
-        json.dump(users_backup, f, indent='  ')
-
-# 將 JSON 檔還原到使用者物件字典
-
-
-def restore_db():
-    with open(sys.path[0] + '/users.json', 'r') as f:
-        users_restore = json.load(f)
-        for key in users_restore.keys():
-            user = users_restore[key]
-            users[key] = Kuser(user['userid'],
-                               user['username'],
-                               user['password'],
-                               user['status'],
-                               user['question'])
-
-
-# 還原資料
-restore_db()
 
 # 開始執行
 MessageLoop(bot, on_chat).run_as_thread()
@@ -771,6 +777,3 @@ while True:
 
     # 定期敲 Telegram 讓 Bot 不要死掉
     bot.getMe()
-
-    # 備份資料
-    backup_db()

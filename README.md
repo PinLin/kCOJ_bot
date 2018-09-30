@@ -14,6 +14,7 @@ It runs as [@kcoj_bot](https://telegram.me/kcoj_bot) now.
   - telepot
   - requests
   - bs4
+  - pymongo
   - KCOJ_api
 
 ## Usage
