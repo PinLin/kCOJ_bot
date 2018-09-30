@@ -45,7 +45,7 @@ bot = telepot.Bot(config['BOT']['TOKEN'])
 
 
 class Kuser:
-    def __init__(self, userid, username='', password='', status='第一次用', question='outside'):
+    def __init__(self, userid, username=None, password=None, status='第一次用', question=None):
         self.userid = userid
         self.username = username
         self.password = password
@@ -60,14 +60,14 @@ class Kuser:
 
     # 輸入學號
     def input_username(self):
-        self.question = 'outside'
+        self.question = None
         self.status = '輸入學號'
         bot.sendMessage(self.userid, "請輸入您的學號：",
                         reply_markup=ReplyKeyboardRemove())
 
     # 輸入密碼
     def input_password(self, text):
-        self.question = 'outside'
+        self.question = None
         self.status = '輸入密碼'
         self.username = text
         # 發送訊息
@@ -76,7 +76,7 @@ class Kuser:
 
     # 輸入舊密碼
     def input_oldpassword(self):
-        self.question = 'outside'
+        self.question = None
         self.status = '舊的密碼'
         bot.sendMessage(self.userid, "請輸入要原本的舊密碼：",
                         reply_markup=ReplyKeyboardMarkup(keyboard=[
@@ -85,7 +85,7 @@ class Kuser:
 
     # 輸入新密碼
     def input_newpassword(self, text):
-        self.question = 'outside'
+        self.question = None
         # 判斷舊密碼是否輸入正確
         if text == self.password:
             # 正確舊密碼
@@ -104,7 +104,7 @@ class Kuser:
 
     # 開始修改密碼
     def change_password(self, text):
-        self.question = 'outside'
+        self.question = None
         self.status = '正常使用'
         # 判斷是否修改
         if self.api.update_password(text):
@@ -121,7 +121,7 @@ class Kuser:
 
     # 執行登入
     def login(self, text):
-        self.question = 'outside'
+        self.question = None
         self.status = '正常使用'
         self.password = text
         # 發送訊息
@@ -134,7 +134,7 @@ class Kuser:
 
     # 登入失敗
     def login_failed(self, chat_id, message_id):
-        self.question = 'outside'
+        self.question = None
         self.status = '正常使用'
         # 判斷使用者從哪操作
         if chat_id != self.userid:
@@ -149,7 +149,7 @@ class Kuser:
 
     # 網站連接失敗
     def connect_failed(self, chat_id, message_id):
-        self.question = 'outside'
+        self.question = None
         self.status = '正常使用'
         # 群組操作
         if chat_id != self.userid:
@@ -184,7 +184,7 @@ class Kuser:
 
     # 登出
     def logout(self):
-        self.question = 'outside'
+        self.question = None
         self.status = '正常使用'
         bot.sendMessage(self.userid, "您現在已經是登出的狀態。",
                         reply_markup=ReplyKeyboardRemove())
@@ -192,7 +192,7 @@ class Kuser:
 
     # 秀出主畫面
     def show_home(self, chat_id):
-        self.question = 'outside'
+        self.question = None
         self.status = '正常使用'
 
         # 訊息內容
@@ -248,7 +248,7 @@ class Kuser:
 
     # 列出題目列表
     def show_questions(self, chat_id):
-        self.question = 'outside'
+        self.question = None
         self.status = '正常使用'
         # 訊息內容
         content = '''
@@ -633,27 +633,27 @@ def on_chat(msg):
                 user.logout()
 
             # 刪除作業
-            elif (command[0] == '/delete' or command[0] == '刪除作業⚔️') and user.question != 'outside':
+            elif (command[0] == '/delete' or command[0] == '刪除作業⚔️') and user.question:
                 if user.keep_online(chat_id, msg['message_id']):
                     user.delete_answer()
 
             # 選擇要上傳的作業
-            elif (command[0] == '/upload' or command[0] == '交作業📮') and user.question != 'outside':
+            elif (command[0] == '/upload' or command[0] == '交作業📮') and user.question:
                 if user.keep_online(chat_id, msg['message_id']):
                     user.upload_answer()
 
             # 看作業執行結果
-            elif (command[0] == '/result' or command[0] == '看結果☑️') and user.question != 'outside':
+            elif (command[0] == '/result' or command[0] == '看結果☑️') and user.question:
                 if user.keep_online(chat_id, msg['message_id']):
                     user.list_results()
 
             # 看本題已通過者
-            elif (command[0] == '/passer' or command[0] == '通過者🌐') and user.question != 'outside':
+            elif (command[0] == '/passer' or command[0] == '通過者🌐') and user.question:
                 if user.keep_online(chat_id, msg['message_id']):
                     user.list_passers()
 
             # 回到題目內容
-            elif command[0] == '回題目📜' and user.question != 'outside':
+            elif command[0] == '回題目📜' and user.question:
                 if user.keep_online(chat_id, msg['message_id']):
                     user.show_question_content(user.question, chat_id)
 
